@@ -6,8 +6,14 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 // Helper function to call Google Gemini API (free tier available)
 const callGeminiAPI = async (prompt: string): Promise<string> => {
   try {
-    const apiKey = GEMINI_API_KEY || 'AIzaSyDwq8qYj3QkXm8ZH6K_m4rQJcXqX8gN6F4'; // Public demo key
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    // Check if API key is available
+    if (!GEMINI_API_KEY) {
+      console.warn('⚠️ No Gemini API key found. Please add VITE_GEMINI_API_KEY to your .env file');
+      console.warn('Get a free key at: https://aistudio.google.com/app/apikey');
+      throw new Error('API key not configured');
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -28,10 +34,13 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
     });
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Gemini API error response:', errorData);
+      throw new Error(`API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
+    console.log('Gemini API response:', data);
 
     if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
       return data.candidates[0].content.parts[0].text.trim();

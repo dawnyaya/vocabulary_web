@@ -55,25 +55,30 @@ cd vocabulary_web
 npm install
 ```
 
-3. **(Optional) Set up API key for better AI features:**
+3. **⚠️ REQUIRED: Set up API key for AI features:**
 
-   The app works with a demo API key, but you can add your own for higher rate limits:
+   To use AI-powered memorization tips and example sentences, you need a free Google Gemini API key:
 
-   Create a `.env` file in the root directory:
+   **Step 1:** Get a free Google Gemini API key:
+   - Go to https://aistudio.google.com/app/apikey
+   - Sign in with your Google account
+   - Click "Create API key"
+   - Copy the key (starts with "AIza...")
+
+   **Step 2:** Create a `.env` file in the root directory:
    ```bash
    cp .env.example .env
    ```
 
-   Get a free Google Gemini API key:
-   - Go to https://aistudio.google.com/app/apikey
-   - Click "Create API key"
-   - Copy the key
-   - Add it to your `.env` file:
+   **Step 3:** Add your API key to `.env`:
    ```
-   VITE_GEMINI_API_KEY=your_api_key_here
+   VITE_GEMINI_API_KEY=AIzaSy...your_actual_key_here
    ```
 
-   **Note:** Translation and AI features work immediately without setup. Adding your own API key provides higher rate limits.
+   **Note:**
+   - ✅ Translation works immediately without setup
+   - ⚠️ AI features (💡 tips and 📝 examples) require your own API key
+   - 🆓 Google Gemini API is completely free with generous limits
 
 4. Start the development server:
 ```bash
@@ -140,29 +145,29 @@ The app uses **MyMemory Translation API** which is:
 
 The translation feature works immediately without any setup!
 
-### AI Generation API - ✅ Working Now!
+### AI Generation API - ⚠️ API Key Required!
 
 The app uses **Google Gemini API** (Gemini Pro model):
 
-**Built-in Demo Key:**
-- ✅ Works immediately out of the box
-- ✅ Smart memorization tips with pronunciation hints
-- ✅ Natural example sentences in your chosen language
-- 📍 Located in: `src/services/ai.ts`
-
-**With Your Own API Key (Recommended):**
-1. Get a free API key at https://aistudio.google.com/app/apikey
+**Setup Required:**
+1. Get a **FREE** API key at https://aistudio.google.com/app/apikey
 2. Add to `.env` file:
    ```
    VITE_GEMINI_API_KEY=your_key_here
    ```
-3. Enjoy higher rate limits and better performance!
+3. Restart your dev server: `npm run dev`
 
-**Features:**
+**Why you need your own key:**
+- 🔑 Demo keys are rate-limited and may not work reliably
+- 🆓 Google Gemini API is **completely free** with generous limits (1500 requests/day)
+- ⚡ Takes only 2 minutes to set up
+- 📍 Located in: `src/services/ai.ts`
+
+**Features you'll get:**
 - 🎯 Pronunciation-focused memorization tips
-- 📝 Context-aware example sentences
+- 📝 Real-life, impressive example sentences
 - 🌐 Multilingual support (Chinese, English, Japanese)
-- 🔄 Smart fallbacks if API is unavailable
+- 🧠 Smart, context-aware AI responses
 
 ### Alternative: Use OpenAI (Optional)
 
