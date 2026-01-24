@@ -1,42 +1,46 @@
 import { Language } from '../types';
 
-// Simple translation service
-// In production, this would call a real API like Google Translate, DeepL, or LibreTranslate
+// Get language code for APIs
+export const getLanguageCode = (lang: Language): string => {
+  const codes: Record<Language, string> = {
+    english: 'en',
+    chinese: 'zh-CN',
+    japanese: 'ja',
+  };
+  return codes[lang];
+};
+
+// Translation service using MyMemory Translation API (free, no API key required)
 export const translateText = async (
   text: string,
   fromLang: Language,
   toLang: Language
 ): Promise<string> => {
-  // Mock implementation - replace with actual API call
-  // Example: LibreTranslate API
-  /*
-  const response = await fetch('https://libretranslate.com/translate', {
-    method: 'POST',
-    body: JSON.stringify({
-      q: text,
-      source: fromLang,
-      target: toLang,
-    }),
-    headers: { 'Content-Type': 'application/json' }
-  });
-  const data = await response.json();
-  return data.translatedText;
-  */
+  try {
+    const sourceLang = getLanguageCode(fromLang);
+    const targetLang = getLanguageCode(toLang);
 
-  // For demo purposes, return a placeholder
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`[Translation of "${text}" from ${fromLang} to ${toLang}]`);
-    }, 500);
-  });
-};
+    // MyMemory Translation API - free and no API key required
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
+      text
+    )}&langpair=${sourceLang}|${targetLang}`;
 
-// Get language code for APIs
-export const getLanguageCode = (lang: Language): string => {
-  const codes: Record<Language, string> = {
-    english: 'en',
-    chinese: 'zh',
-    japanese: 'ja',
-  };
-  return codes[lang];
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Translation failed');
+    }
+
+    const data = await response.json();
+
+    if (data.responseStatus === 200 && data.responseData?.translatedText) {
+      return data.responseData.translatedText;
+    } else {
+      throw new Error('Translation not available');
+    }
+  } catch (error) {
+    console.error('Translation error:', error);
+    // Fallback: return original text with error message
+    return `[Translation unavailable: ${text}]`;
+  }
 };

@@ -33,8 +33,8 @@ A lightweight web application for vocabulary memorization using flip-style flash
 - **Routing**: React Router v6
 - **Storage**: LocalStorage (client-side)
 - **Text-to-Speech**: Web Speech API
-- **Translation**: Pluggable API (currently mock, supports LibreTranslate, Google Translate, etc.)
-- **AI Features**: Pluggable API (currently mock, supports OpenAI, Anthropic Claude, etc.)
+- **Translation**: MyMemory Translation API (free, no API key required)
+- **AI Features**: HuggingFace Inference API (free tier available with optional API key)
 
 ## Getting Started
 
@@ -55,12 +55,30 @@ cd vocabulary_web
 npm install
 ```
 
-3. Start the development server:
+3. **(Optional) Set up API key for AI features:**
+
+   Create a `.env` file in the root directory:
+   ```bash
+   cp .env.example .env
+   ```
+
+   Get a free HuggingFace API key:
+   - Go to https://huggingface.co/settings/tokens
+   - Click "New token"
+   - Copy the token
+   - Add it to your `.env` file:
+   ```
+   VITE_HUGGINGFACE_API_KEY=your_api_key_here
+   ```
+
+   **Note:** Translation works without any API key. AI features will provide fallback responses if no key is provided, but work better with an API key.
+
+4. Start the development server:
 ```bash
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+5. Open your browser and navigate to `http://localhost:5173`
 
 ### Building for Production
 
@@ -110,50 +128,53 @@ vocabulary_web/
 
 ## API Integration
 
-### Translation API
+### Translation API - ✅ Working Now!
 
-To use real translation, update `src/services/translation.ts`:
+The app uses **MyMemory Translation API** which is:
+- ✅ **Free** - No cost or subscription needed
+- ✅ **No API key required** - Works immediately out of the box
+- ✅ **Supports 50+ languages** - Including Chinese, English, and Japanese
+- 📍 Located in: `src/services/translation.ts`
+
+The translation feature works immediately without any setup!
+
+### AI Generation API - ✅ Working Now!
+
+The app uses **HuggingFace Inference API** with the Mistral-7B model:
+
+**Without API key (Free):**
+- ✅ Works with limited rate limits
+- ✅ Provides fallback responses if rate limited
+- 📍 Located in: `src/services/ai.ts`
+
+**With API key (Better):**
+1. Get a free API key at https://huggingface.co/settings/tokens
+2. Add to `.env` file:
+   ```
+   VITE_HUGGINGFACE_API_KEY=your_key_here
+   ```
+3. Enjoy higher rate limits and better performance!
+
+### Alternative: Use OpenAI (Optional)
+
+If you prefer OpenAI, you can modify `src/services/ai.ts`:
 
 ```typescript
-// Example with LibreTranslate
-export const translateText = async (text: string, fromLang: Language, toLang: Language): Promise<string> => {
-  const response = await fetch('https://libretranslate.com/translate', {
-    method: 'POST',
-    body: JSON.stringify({
-      q: text,
-      source: getLanguageCode(fromLang),
-      target: getLanguageCode(toLang),
-    }),
-    headers: { 'Content-Type': 'application/json' }
-  });
-  const data = await response.json();
-  return data.translatedText;
-};
-```
-
-### AI API
-
-To use real AI generation, update `src/services/ai.ts`:
-
-```typescript
-// Example with OpenAI
-export const generateMemorizationTip = async (...) => {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
-      messages: [{
-        role: 'user',
-        content: `Generate a memorization tip...`
-      }]
-    })
-  });
-  // Parse and return response
-};
+// Example with OpenAI API
+const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${OPENAI_API_KEY}`
+  },
+  body: JSON.stringify({
+    model: 'gpt-3.5-turbo',
+    messages: [{
+      role: 'user',
+      content: prompt
+    }]
+  })
+});
 ```
 
 ## Data Storage
