@@ -34,7 +34,7 @@ A lightweight web application for vocabulary memorization using flip-style flash
 - **Storage**: LocalStorage (client-side)
 - **Text-to-Speech**: Web Speech API
 - **Translation**: MyMemory Translation API (free, no API key required)
-- **AI Features**: HuggingFace Inference API (free tier available with optional API key)
+- **AI Features**: Google Gemini API (free tier with generous limits)
 
 ## Getting Started
 
@@ -55,23 +55,25 @@ cd vocabulary_web
 npm install
 ```
 
-3. **(Optional) Set up API key for AI features:**
+3. **(Optional) Set up API key for better AI features:**
+
+   The app works with a demo API key, but you can add your own for higher rate limits:
 
    Create a `.env` file in the root directory:
    ```bash
    cp .env.example .env
    ```
 
-   Get a free HuggingFace API key:
-   - Go to https://huggingface.co/settings/tokens
-   - Click "New token"
-   - Copy the token
+   Get a free Google Gemini API key:
+   - Go to https://aistudio.google.com/app/apikey
+   - Click "Create API key"
+   - Copy the key
    - Add it to your `.env` file:
    ```
-   VITE_HUGGINGFACE_API_KEY=your_api_key_here
+   VITE_GEMINI_API_KEY=your_api_key_here
    ```
 
-   **Note:** Translation works without any API key. AI features will provide fallback responses if no key is provided, but work better with an API key.
+   **Note:** Translation and AI features work immediately without setup. Adding your own API key provides higher rate limits.
 
 4. Start the development server:
 ```bash
@@ -140,20 +142,27 @@ The translation feature works immediately without any setup!
 
 ### AI Generation API - ✅ Working Now!
 
-The app uses **HuggingFace Inference API** with the Mistral-7B model:
+The app uses **Google Gemini API** (Gemini Pro model):
 
-**Without API key (Free):**
-- ✅ Works with limited rate limits
-- ✅ Provides fallback responses if rate limited
+**Built-in Demo Key:**
+- ✅ Works immediately out of the box
+- ✅ Smart memorization tips with pronunciation hints
+- ✅ Natural example sentences in your chosen language
 - 📍 Located in: `src/services/ai.ts`
 
-**With API key (Better):**
-1. Get a free API key at https://huggingface.co/settings/tokens
+**With Your Own API Key (Recommended):**
+1. Get a free API key at https://aistudio.google.com/app/apikey
 2. Add to `.env` file:
    ```
-   VITE_HUGGINGFACE_API_KEY=your_key_here
+   VITE_GEMINI_API_KEY=your_key_here
    ```
 3. Enjoy higher rate limits and better performance!
+
+**Features:**
+- 🎯 Pronunciation-focused memorization tips
+- 📝 Context-aware example sentences
+- 🌐 Multilingual support (Chinese, English, Japanese)
+- 🔄 Smart fallbacks if API is unavailable
 
 ### Alternative: Use OpenAI (Optional)
 
