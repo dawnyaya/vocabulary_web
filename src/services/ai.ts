@@ -105,13 +105,13 @@ export const generateExampleSentence = async (
   try {
     const inputLangName = getLanguageName(inputLang);
 
-    const prompt = `Create ONE simple, natural example sentence in ${inputLangName} using the word "${word}".
+    const prompt = `Please generate a real-life, spoken-style sentence with "${word}" - something sounds natural and a little bit impressive. Under 30 words please.
 
 Requirements:
-- Use everyday conversation
-- Keep it short (5-10 words)
-- Show practical usage
-- Write ONLY the sentence in ${inputLangName}
+- Write the sentence in ${inputLangName}
+- Use everyday spoken language
+- Make it memorable and engaging
+- ONLY output the sentence, no explanation
 
 Sentence:`;
 
@@ -119,8 +119,9 @@ Sentence:`;
 
     // Clean up the response
     const cleanSentence = sentence
-      .replace(/^(Sentence:|Example:|Here's an example:)/i, '')
+      .replace(/^(Sentence:|Example:|Here's an example:|Here is|This is)/i, '')
       .replace(/^["']|["']$/g, '')
+      .replace(/^:\s*/, '')
       .trim();
 
     return cleanSentence || `Example with "${word}" (generated)`;
