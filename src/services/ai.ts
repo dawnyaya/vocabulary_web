@@ -117,12 +117,12 @@ export const generateExampleSentence = async (
   try {
     const inputLangName = getLanguageName(inputLang);
 
-    const prompt = `Please generate a real-life, spoken-style sentence with "${word}" - something sounds natural and a little bit impressive. Under 30 words please.
+    const prompt = `Please generate a real-life, spoken-style sentence with "${word}" - something sounds natural. Under 30 words please.
 
 Requirements:
 - Write the sentence in ${inputLangName}
 - Use everyday spoken language
-- Make it memorable and engaging
+- Make it natural and practical
 - ONLY output the sentence, no explanation
 
 Sentence:`;
