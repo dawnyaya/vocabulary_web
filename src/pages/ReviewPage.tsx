@@ -1,48 +1,65 @@
 import { FC, useState, useEffect } from 'react';
 import { WordWithProgress } from '../types';
-import { storageService } from '../services/storage';
+import { cloudStorageService } from '../services/cloudStorage';
 import { getDueWords, updateWordProgress } from '../services/spacedRepetition';
+import { useAuth } from '../contexts/AuthContext';
 import { FlashCard } from '../components/FlashCard';
 
 type DifficultyLevel = 'again' | 'good' | 'easy';
 
 export const ReviewPage: FC = () => {
+  const { user } = useAuth();
   const [dueWords, setDueWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadDueWords();
-  }, []);
+  }, [user]);
 
-  const loadDueWords = () => {
-    const words = storageService.getWords();
-    const allProgress = storageService.getProgress();
-    const dueProgress = getDueWords(allProgress);
+  const loadDueWords = async () => {
+    if (!user) return;
 
-    // Get words that are due for review
-    const wordsToReview = words
-      .filter((word) => {
-        const progress = dueProgress.find((p) => p.wordId === word.id);
-        return progress !== undefined;
-      })
-      .map((word) => ({
-        ...word,
-        progress: allProgress.find((p) => p.wordId === word.id),
-      }));
+    setLoading(true);
+    try {
+      const [words, allProgress] = await Promise.all([
+        cloudStorageService.getWords(user.uid),
+        cloudStorageService.getProgress(user.uid),
+      ]);
 
-    // Also include new words (no progress yet)
-    const newWords = words
-      .filter((word) => !allProgress.find((p) => p.wordId === word.id))
-      .map((word) => ({ ...word, progress: undefined }));
+      const dueProgress = getDueWords(allProgress);
 
-    const allDueWords = [...wordsToReview, ...newWords];
-    setDueWords(allDueWords);
-    setIsComplete(allDueWords.length === 0);
+      // Get words that are due for review
+      const wordsToReview = words
+        .filter((word) => {
+          const progress = dueProgress.find((p) => p.wordId === word.id);
+          return progress !== undefined;
+        })
+        .map((word) => ({
+          ...word,
+          progress: allProgress.find((p) => p.wordId === word.id),
+        }));
+
+      // Also include new words (no progress yet)
+      const newWords = words
+        .filter((word) => !allProgress.find((p) => p.wordId === word.id))
+        .map((word) => ({ ...word, progress: undefined }));
+
+      const allDueWords = [...wordsToReview, ...newWords];
+      setDueWords(allDueWords);
+      setIsComplete(allDueWords.length === 0);
+    } catch (error) {
+      console.error('Error loading due words:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDifficultySelect = (difficulty: DifficultyLevel) => {
+  const handleDifficultySelect = async (difficulty: DifficultyLevel) => {
+    if (!user) return;
+
     const currentWord = dueWords[currentIndex];
     if (!currentWord) return;
 
@@ -59,14 +76,20 @@ export const ReviewPage: FC = () => {
       familiarityMap[difficulty],
       currentWord.progress
     );
-    storageService.updateProgress(newProgress);
 
-    // Move to next word or complete
-    if (currentIndex < dueWords.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setIsRevealed(false);
-    } else {
-      setIsComplete(true);
+    try {
+      await cloudStorageService.updateProgress(user.uid, newProgress);
+
+      // Move to next word or complete
+      if (currentIndex < dueWords.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+        setIsRevealed(false);
+      } else {
+        setIsComplete(true);
+      }
+    } catch (error) {
+      console.error('Error updating progress:', error);
+      alert('Failed to save progress. Please try again.');
     }
   };
 

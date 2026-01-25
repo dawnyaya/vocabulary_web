@@ -1,13 +1,29 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { VocabularyWord } from '../types';
-import { storageService } from '../services/storage';
+import { cloudStorageService } from '../services/cloudStorage';
+import { useAuth } from '../contexts/AuthContext';
 import { AddWord } from '../components/AddWord';
 
 export const AddWordPage: FC = () => {
-  const handleSave = (word: VocabularyWord) => {
-    storageService.addWord(word);
-    // Show success message
-    alert('Word saved successfully!');
+  const { user } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async (word: VocabularyWord) => {
+    if (!user) {
+      alert('Please sign in to save words');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await cloudStorageService.addWord(user.uid, word);
+      alert('Word saved successfully!');
+    } catch (error) {
+      console.error('Error saving word:', error);
+      alert('Failed to save word. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

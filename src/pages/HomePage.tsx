@@ -1,25 +1,43 @@
 import { FC, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { storageService } from '../services/storage';
+import { cloudStorageService } from '../services/cloudStorage';
 import { getDueWords } from '../services/spacedRepetition';
+import { useAuth } from '../contexts/AuthContext';
 
 export const HomePage: FC = () => {
+  const { user } = useAuth();
   const [totalWords, setTotalWords] = useState(0);
   const [dueCount, setDueCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const words = storageService.getWords();
-    const allProgress = storageService.getProgress();
-    const due = getDueWords(allProgress);
+    const loadData = async () => {
+      if (!user) return;
 
-    // Count new words (no progress yet)
-    const newWords = words.filter(
-      (word) => !allProgress.find((p) => p.wordId === word.id)
-    );
+      try {
+        const [words, allProgress] = await Promise.all([
+          cloudStorageService.getWords(user.uid),
+          cloudStorageService.getProgress(user.uid),
+        ]);
 
-    setTotalWords(words.length);
-    setDueCount(due.length + newWords.length);
-  }, []);
+        const due = getDueWords(allProgress);
+
+        // Count new words (no progress yet)
+        const newWords = words.filter(
+          (word) => !allProgress.find((p) => p.wordId === word.id)
+        );
+
+        setTotalWords(words.length);
+        setDueCount(due.length + newWords.length);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-off-white p-6 md:p-12">

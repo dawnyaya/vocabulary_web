@@ -3,15 +3,28 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 import { HomePage } from './pages/HomePage';
 import { AddWordPage } from './pages/AddWordPage';
 import { ReviewPage } from './pages/ReviewPage';
+import { LoginPage } from './pages/LoginPage';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { signOut } from './services/auth';
 import { loadVoices } from './services/textToSpeech';
 
 const Navigation: FC = () => {
   const location = useLocation();
+  const { user } = useAuth();
 
-  // Don't show navigation on home page
-  if (location.pathname === '/') {
+  // Don't show navigation on home page or login page
+  if (location.pathname === '/' || location.pathname === '/login') {
     return null;
   }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <nav className="bg-white/60 backdrop-blur-md border-b border-black/5 sticky top-0 z-50">
@@ -47,6 +60,30 @@ const Navigation: FC = () => {
               </Link>
             </div>
           </div>
+
+          {/* User Profile & Sign Out */}
+          {user && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                {user.photoURL && (
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || 'User'}
+                    className="w-8 h-8 rounded-full border-2 border-brand-200"
+                  />
+                )}
+                <span className="text-sm font-medium text-gray-700 hidden md:block">
+                  {user.displayName || user.email}
+                </span>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100/60 rounded-xl transition-all duration-200"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>
@@ -61,14 +98,38 @@ const App: FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen bg-off-white">
-        <Navigation />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/add" element={<AddWordPage />} />
-          <Route path="/review" element={<ReviewPage />} />
-        </Routes>
-      </div>
+      <AuthProvider>
+        <div className="min-h-screen bg-off-white">
+          <Navigation />
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add"
+              element={
+                <ProtectedRoute>
+                  <AddWordPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/review"
+              element={
+                <ProtectedRoute>
+                  <ReviewPage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </AuthProvider>
     </Router>
   );
 };
