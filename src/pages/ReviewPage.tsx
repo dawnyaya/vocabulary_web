@@ -1,14 +1,15 @@
 import { FC, useState, useEffect } from 'react';
-import { FamiliarityLevel, WordWithProgress } from '../types';
+import { WordWithProgress } from '../types';
 import { storageService } from '../services/storage';
 import { getDueWords, updateWordProgress } from '../services/spacedRepetition';
 import { FlashCard } from '../components/FlashCard';
-import { FamiliaritySelector } from '../components/FamiliaritySelector';
+
+type DifficultyLevel = 'again' | 'hard' | 'good' | 'easy';
 
 export const ReviewPage: FC = () => {
   const [dueWords, setDueWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showSelector, setShowSelector] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
@@ -41,14 +42,22 @@ export const ReviewPage: FC = () => {
     setIsComplete(allDueWords.length === 0);
   };
 
-  const handleFamiliaritySelect = (level: FamiliarityLevel) => {
+  const handleDifficultySelect = (difficulty: DifficultyLevel) => {
     const currentWord = dueWords[currentIndex];
     if (!currentWord) return;
+
+    // Map difficulty to familiarity level for existing progress system
+    const familiarityMap = {
+      'again': 'not-familiar',
+      'hard': 'not-familiar',
+      'good': 'little-familiar',
+      'easy': 'very-familiar',
+    } as const;
 
     // Update progress
     const newProgress = updateWordProgress(
       currentWord.id,
-      level,
+      familiarityMap[difficulty],
       currentWord.progress
     );
     storageService.updateProgress(newProgress);
@@ -56,36 +65,36 @@ export const ReviewPage: FC = () => {
     // Move to next word or complete
     if (currentIndex < dueWords.length - 1) {
       setCurrentIndex(currentIndex + 1);
-      setShowSelector(false);
+      setIsRevealed(false);
     } else {
       setIsComplete(true);
     }
   };
 
-  const handleShowSelector = () => {
-    setShowSelector(true);
+  const handleReveal = () => {
+    setIsRevealed(true);
   };
 
   const handleRestart = () => {
     loadDueWords();
     setCurrentIndex(0);
-    setShowSelector(false);
+    setIsRevealed(false);
     setIsComplete(false);
   };
 
   if (isComplete) {
     return (
       <div className="min-h-screen bg-off-white flex items-center justify-center p-4">
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl border border-black/5 p-12 text-center max-w-md">
+        <div className="bg-white rounded-3xl shadow-xl p-12 text-center max-w-md">
           <div className="inline-block p-4 bg-brand-50 rounded-2xl mb-4">
             <svg className="w-12 h-12 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold text-charcoal mb-4 tracking-tight">
+          <h2 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">
             All Done!
           </h2>
-          <p className="text-gray-500 mb-8 leading-relaxed">
+          <p className="text-gray-600 mb-8 leading-relaxed">
             {dueWords.length === 0
               ? "You don't have any words to review right now. Come back later!"
               : 'Great job! You have completed all your reviews for today.'}
@@ -104,19 +113,16 @@ export const ReviewPage: FC = () => {
   const currentWord = dueWords[currentIndex];
 
   return (
-    <div className="min-h-screen bg-off-white py-12 px-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-off-white py-8 px-4">
+      <div className="max-w-2xl mx-auto">
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-              Progress
-            </span>
-            <span className="text-sm font-bold text-charcoal">
+        <div className="mb-12">
+          <div className="flex justify-end mb-2">
+            <span className="text-xs font-semibold text-gray-500">
               {currentIndex + 1} / {dueWords.length}
             </span>
           </div>
-          <div className="w-full bg-white/60 backdrop-blur-sm rounded-full h-2.5 border border-black/5 overflow-hidden">
+          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
             <div
               className="bg-gradient-to-r from-brand-500 to-brand-600 h-full rounded-full transition-all duration-500 ease-out"
               style={{
@@ -127,21 +133,43 @@ export const ReviewPage: FC = () => {
         </div>
 
         {/* Flash Card */}
-        {currentWord && <FlashCard word={currentWord} />}
+        {currentWord && (
+          <FlashCard
+            word={currentWord}
+            onReveal={handleReveal}
+            isRevealed={isRevealed}
+          />
+        )}
 
-        {/* Action Buttons */}
-        <div className="mt-8 flex justify-center">
-          {!showSelector ? (
+        {/* Assessment Buttons - Only show when revealed */}
+        {isRevealed && (
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-[500px] mx-auto">
             <button
-              onClick={handleShowSelector}
-              className="px-8 py-4 bg-brand-500 text-white font-semibold text-lg rounded-xl hover:bg-brand-600 transition-all duration-200 shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30"
+              onClick={() => handleDifficultySelect('again')}
+              className="py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
             >
-              Rate Your Familiarity
+              Again
             </button>
-          ) : (
-            <FamiliaritySelector onSelect={handleFamiliaritySelect} />
-          )}
-        </div>
+            <button
+              onClick={() => handleDifficultySelect('hard')}
+              className="py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
+            >
+              Hard
+            </button>
+            <button
+              onClick={() => handleDifficultySelect('good')}
+              className="py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
+            >
+              Good
+            </button>
+            <button
+              onClick={() => handleDifficultySelect('easy')}
+              className="py-3 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
+            >
+              Easy
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

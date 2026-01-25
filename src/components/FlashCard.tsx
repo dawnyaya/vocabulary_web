@@ -1,16 +1,21 @@
 import { FC, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Volume2 } from 'lucide-react';
 import { VocabularyWord } from '../types';
 import { speakText } from '../services/textToSpeech';
 
 interface FlashCardProps {
   word: VocabularyWord;
+  onReveal?: () => void;
+  isRevealed?: boolean;
 }
 
-export const FlashCard: FC<FlashCardProps> = ({ word }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
+export const FlashCard: FC<FlashCardProps> = ({ word, onReveal, isRevealed = false }) => {
+  const [revealed, setRevealed] = useState(isRevealed);
 
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
+  const handleReveal = () => {
+    setRevealed(true);
+    onReveal?.();
   };
 
   const handleSpeak = (e: React.MouseEvent) => {
@@ -19,73 +24,85 @@ export const FlashCard: FC<FlashCardProps> = ({ word }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div
-        className={`flip-card ${isFlipped ? 'flipped' : ''} cursor-pointer`}
-        onClick={handleFlip}
-      >
-        <div className="flip-card-inner h-80">
-          {/* Front of card - shows the word */}
-          <div className="flip-card-front">
-            <div className="h-full bg-charcoal rounded-3xl border border-charcoal/20 p-8 flex flex-col items-center justify-center text-white shadow-2xl shadow-charcoal/20">
-              <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
-                {word.inputLanguage}
-              </div>
-              <div className="text-5xl md:text-6xl font-bold mb-8 text-center tracking-tight">{word.word}</div>
-
-              <button
-                onClick={handleSpeak}
-                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-4 transition-all duration-200 hover:scale-110 border border-white/10"
-                aria-label="Pronounce word"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-
-              <div className="mt-8 text-sm text-gray-400 font-medium">Click to reveal translation</div>
+    <div className="w-full max-w-[500px] mx-auto">
+      <AnimatePresence mode="wait">
+        {!revealed ? (
+          // Front of card
+          <motion.div
+            key="front"
+            initial={{ opacity: 0, rotateY: -10 }}
+            animate={{ opacity: 1, rotateY: 0 }}
+            exit={{ opacity: 0, rotateY: 10 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-3xl shadow-xl p-12 flex flex-col items-center justify-center min-h-[400px]"
+          >
+            <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">
+              {word.inputLanguage}
             </div>
-          </div>
 
-          {/* Back of card - shows translation and additional info */}
-          <div className="flip-card-back">
-            <div className="h-full bg-white/90 backdrop-blur-md rounded-3xl border border-black/10 p-8 flex flex-col items-center justify-center text-charcoal shadow-2xl shadow-charcoal/10">
-              <div className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3">
-                {word.outputLanguage}
-              </div>
-              <div className="text-4xl md:text-5xl font-bold mb-6 text-center tracking-tight">{word.translation}</div>
+            <div className="text-6xl md:text-7xl font-bold text-slate-900 mb-8 text-center tracking-tight">
+              {word.word}
+            </div>
 
+            <button
+              onClick={handleSpeak}
+              className="mb-12 p-4 bg-gray-100 hover:bg-gray-200 rounded-full transition-all duration-200 hover:scale-110"
+              aria-label="Pronounce word"
+            >
+              <Volume2 className="w-6 h-6 text-gray-600" />
+            </button>
+
+            <button
+              onClick={handleReveal}
+              className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 text-lg"
+            >
+              Tap to Reveal
+            </button>
+          </motion.div>
+        ) : (
+          // Back of card
+          <motion.div
+            key="back"
+            initial={{ opacity: 0, rotateY: -10 }}
+            animate={{ opacity: 1, rotateY: 0 }}
+            exit={{ opacity: 0, rotateY: 10 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-3xl shadow-xl p-8 min-h-[400px] flex flex-col"
+          >
+            <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 text-center">
+              {word.outputLanguage}
+            </div>
+
+            <div className="text-5xl font-bold text-slate-900 mb-6 text-center tracking-tight">
+              {word.translation}
+            </div>
+
+            <div className="flex-1 space-y-4">
               {word.memorizationTip && (
-                <div className="bg-brand-50/80 backdrop-blur-sm rounded-2xl border border-brand-100 p-4 mb-4 w-full">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-brand-600 mb-2">
-                    Tip
+                <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100">
+                  <div className="text-xs font-bold uppercase tracking-wider text-blue-700 mb-2">
+                    💡 Memorization Tip
                   </div>
-                  <div className="text-sm text-charcoal leading-relaxed">{word.memorizationTip}</div>
+                  <div className="text-sm text-slate-700 leading-relaxed">
+                    {word.memorizationTip}
+                  </div>
                 </div>
               )}
 
               {word.exampleSentence && (
-                <div className="bg-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200 p-4 w-full">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
-                    Example
+                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                    📝 Example
                   </div>
-                  <div className="text-sm italic text-charcoal leading-relaxed">{word.exampleSentence}</div>
+                  <div className="text-sm italic text-slate-700 leading-relaxed">
+                    {word.exampleSentence}
+                  </div>
                 </div>
               )}
-
-              <div className="mt-8 text-sm text-gray-500 font-medium">Click to flip back</div>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
