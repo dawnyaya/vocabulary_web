@@ -117,8 +117,8 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Add New Word</h2>
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto bg-white rounded-xl border-2 border-gray-200 p-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Word</h2>
 
       {/* Language Selectors */}
       <div className="grid grid-cols-2 gap-4 mb-6">
@@ -129,7 +129,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
           <select
             value={inputLanguage}
             onChange={(e) => setInputLanguage(e.target.value as Language)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
             {languages.map((lang) => (
               <option key={lang} value={lang}>
@@ -146,7 +146,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
           <select
             value={outputLanguage}
             onChange={(e) => setOutputLanguage(e.target.value as Language)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
             {languages.map((lang) => (
               <option key={lang} value={lang}>
@@ -165,14 +165,14 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             type="text"
             value={word}
             onChange={(e) => setWord(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             placeholder="Enter word..."
             required
           />
           <button
             type="button"
             onClick={handleSpeak}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
             title="Pronounce"
           >
             Speak
@@ -190,7 +190,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             type="text"
             value={translation}
             onChange={(e) => setTranslation(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             placeholder="Enter translation..."
             required
           />
@@ -198,7 +198,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             type="button"
             onClick={handleAutoTranslate}
             disabled={isTranslating || !word.trim()}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-white border-2 border-gray-900 text-gray-900 rounded-lg hover:bg-gray-50 transition-colors disabled:bg-gray-100 disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed"
           >
             {isTranslating ? 'Translating...' : 'Translate'}
           </button>
@@ -214,7 +214,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
           <textarea
             value={memorizationTip}
             onChange={(e) => setMemorizationTip(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             placeholder="Add a tip to help remember..."
             rows={2}
           />
@@ -222,7 +222,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             type="button"
             onClick={handleGenerateTip}
             disabled={isGeneratingTip || !word.trim()}
-            className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
+            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
             title={!word.trim() ? 'Please fill in word first' : 'Generate AI memorization tip'}
           >
             {isGeneratingTip ? 'Generating...' : 'AI Tip'}
@@ -239,7 +239,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
           <textarea
             value={exampleSentence}
             onChange={(e) => setExampleSentence(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             placeholder="Add an example sentence..."
             rows={2}
           />
@@ -247,7 +247,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             type="button"
             onClick={handleGenerateExample}
             disabled={isGeneratingExample || !word.trim()}
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
+            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
             title={!word.trim() ? 'Please fill in word first' : 'Generate AI example sentence'}
           >
             {isGeneratingExample ? 'Generating...' : 'AI Example'}
@@ -258,7 +258,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
       {/* Submit Button */}
       <button
         type="submit"
-        className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 hover:shadow-lg"
+        className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-200"
       >
         Save Word
       </button>

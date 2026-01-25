@@ -27,15 +27,15 @@ export const FlashCard: FC<FlashCardProps> = ({ word }) => {
         <div className="flip-card-inner h-80">
           {/* Front of card - shows the word */}
           <div className="flip-card-front">
-            <div className="h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-2xl p-8 flex flex-col items-center justify-center text-white">
-              <div className="text-sm uppercase tracking-wide opacity-80 mb-2">
+            <div className="h-full bg-gray-900 rounded-2xl border-2 border-gray-900 p-8 flex flex-col items-center justify-center text-white">
+              <div className="text-sm uppercase tracking-wide text-gray-400 mb-2">
                 {word.inputLanguage}
               </div>
               <div className="text-5xl font-bold mb-6 text-center">{word.word}</div>
 
               <button
                 onClick={handleSpeak}
-                className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-4 transition-all duration-200 hover:scale-110"
+                className="bg-white bg-opacity-10 hover:bg-opacity-20 rounded-full p-4 transition-all duration-200 hover:scale-110"
                 aria-label="Pronounce word"
               >
                 <svg
@@ -51,37 +51,37 @@ export const FlashCard: FC<FlashCardProps> = ({ word }) => {
                 </svg>
               </button>
 
-              <div className="mt-8 text-sm opacity-70">Click to reveal translation</div>
+              <div className="mt-8 text-sm text-gray-400">Click to reveal translation</div>
             </div>
           </div>
 
           {/* Back of card - shows translation and additional info */}
           <div className="flip-card-back">
-            <div className="h-full bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl shadow-2xl p-8 flex flex-col items-center justify-center text-white">
-              <div className="text-sm uppercase tracking-wide opacity-80 mb-2">
+            <div className="h-full bg-white rounded-2xl border-2 border-gray-900 p-8 flex flex-col items-center justify-center text-gray-900">
+              <div className="text-sm uppercase tracking-wide text-gray-500 mb-2">
                 {word.outputLanguage}
               </div>
               <div className="text-4xl font-bold mb-6 text-center">{word.translation}</div>
 
               {word.memorizationTip && (
-                <div className="bg-white bg-opacity-20 rounded-lg p-4 mb-4 w-full">
-                  <div className="text-xs uppercase tracking-wide opacity-80 mb-1">
-                    💡 Tip
+                <div className="bg-gray-100 rounded-lg p-4 mb-4 w-full">
+                  <div className="text-xs uppercase tracking-wide text-gray-600 mb-1">
+                    Tip
                   </div>
-                  <div className="text-sm">{word.memorizationTip}</div>
+                  <div className="text-sm text-gray-900">{word.memorizationTip}</div>
                 </div>
               )}
 
               {word.exampleSentence && (
-                <div className="bg-white bg-opacity-20 rounded-lg p-4 w-full">
-                  <div className="text-xs uppercase tracking-wide opacity-80 mb-1">
-                    📝 Example
+                <div className="bg-gray-100 rounded-lg p-4 w-full">
+                  <div className="text-xs uppercase tracking-wide text-gray-600 mb-1">
+                    Example
                   </div>
-                  <div className="text-sm italic">{word.exampleSentence}</div>
+                  <div className="text-sm italic text-gray-900">{word.exampleSentence}</div>
                 </div>
               )}
 
-              <div className="mt-8 text-sm opacity-70">Click to flip back</div>
+              <div className="mt-8 text-sm text-gray-500">Click to flip back</div>
             </div>
           </div>
         </div>

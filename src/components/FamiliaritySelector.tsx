@@ -15,19 +15,19 @@ export const FamiliaritySelector: FC<FamiliaritySelectorProps> = ({ onSelect }) 
     {
       level: 'not-familiar',
       label: 'Not Familiar',
-      color: 'bg-red-500 hover:bg-red-600',
+      color: 'bg-gray-300 hover:bg-gray-400',
       description: 'Review tomorrow',
     },
     {
       level: 'little-familiar',
       label: 'Little Familiar',
-      color: 'bg-yellow-500 hover:bg-yellow-600',
+      color: 'bg-gray-600 hover:bg-gray-700',
       description: 'Review in 2 days',
     },
     {
       level: 'very-familiar',
       label: 'Very Familiar',
-      color: 'bg-green-500 hover:bg-green-600',
+      color: 'bg-gray-900 hover:bg-gray-800',
       description: 'Review in 3+ days',
     },
   ];

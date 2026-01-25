@@ -14,22 +14,22 @@ const Navigation: FC = () => {
   }
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center gap-8">
             <Link
               to="/"
-              className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600"
+              className="text-2xl font-bold text-gray-900"
             >
-              📚 Vocabulary
+              Vocabulary
             </Link>
             <div className="flex gap-4">
               <Link
                 to="/add"
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   location.pathname === '/add'
-                    ? 'bg-blue-500 text-white'
+                    ? 'bg-gray-900 text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -39,7 +39,7 @@ const Navigation: FC = () => {
                 to="/review"
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   location.pathname === '/review'
-                    ? 'bg-purple-500 text-white'
+                    ? 'bg-gray-900 text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -61,7 +61,7 @@ const App: FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-white">
         <Navigation />
         <Routes>
           <Route path="/" element={<HomePage />} />

@@ -75,10 +75,9 @@ export const ReviewPage: FC = () => {
 
   if (isComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md">
-          <div className="text-6xl mb-6">🎉</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl border-2 border-gray-200 p-12 text-center max-w-md">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
             All Done!
           </h2>
           <p className="text-gray-600 mb-8">
@@ -88,7 +87,7 @@ export const ReviewPage: FC = () => {
           </p>
           <button
             onClick={handleRestart}
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 hover:shadow-lg"
+            className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-200"
           >
             Review Again
           </button>
@@ -100,7 +99,7 @@ export const ReviewPage: FC = () => {
   const currentWord = dueWords[currentIndex];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 py-8 px-4">
+    <div className="min-h-screen bg-white py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Progress Bar */}
         <div className="mb-8">
@@ -112,9 +111,9 @@ export const ReviewPage: FC = () => {
               {currentIndex + 1} / {dueWords.length}
             </span>
           </div>
-          <div className="w-full bg-white rounded-full h-3 shadow-inner">
+          <div className="w-full bg-gray-200 rounded-full h-3">
             <div
-              className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-300"
+              className="bg-gray-900 h-3 rounded-full transition-all duration-300"
               style={{
                 width: `${((currentIndex + 1) / dueWords.length) * 100}%`,
               }}
@@ -130,7 +129,7 @@ export const ReviewPage: FC = () => {
           {!showSelector ? (
             <button
               onClick={handleShowSelector}
-              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-lg rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 hover:shadow-lg hover:scale-105"
+              className="px-8 py-4 bg-gray-900 text-white font-semibold text-lg rounded-xl hover:bg-gray-800 transition-all duration-200"
             >
               Rate Your Familiarity
             </button>
