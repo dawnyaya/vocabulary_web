@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2 } from 'lucide-react';
+import { Volume2, RefreshCw } from 'lucide-react';
 import { VocabularyWord } from '../types';
 import { speakText } from '../services/textToSpeech';
 
@@ -12,19 +12,43 @@ interface FlashCardProps {
 
 export const FlashCard: FC<FlashCardProps> = ({ word, onReveal, isRevealed = false }) => {
   const [revealed, setRevealed] = useState(isRevealed);
+  const [isFlipped, setIsFlipped] = useState(false); // false: word→translation, true: translation→word
 
   const handleReveal = () => {
     setRevealed(true);
     onReveal?.();
   };
 
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped);
+    setRevealed(false); // Reset to front when flipping
+  };
+
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
-    speakText(word.word, word.inputLanguage);
+    const textToSpeak = isFlipped ? word.translation : word.word;
+    const language = isFlipped ? word.outputLanguage : word.inputLanguage;
+    speakText(textToSpeak, language);
   };
+
+  // Determine what to show based on flip state
+  const frontText = isFlipped ? word.translation : word.word;
+  const frontLang = isFlipped ? word.outputLanguage : word.inputLanguage;
+  const backText = isFlipped ? word.word : word.translation;
+  const backLang = isFlipped ? word.inputLanguage : word.outputLanguage;
 
   return (
     <div className="w-full max-w-[500px] mx-auto">
+      {/* Flip button */}
+      <div className="flex justify-center mb-4">
+        <button
+          onClick={handleFlip}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-all duration-200 text-sm font-medium"
+        >
+          <RefreshCw className="w-4 h-4" />
+          翻转卡片
+        </button>
+      </div>
       <AnimatePresence mode="wait">
         {!revealed ? (
           // Front of card
@@ -37,11 +61,11 @@ export const FlashCard: FC<FlashCardProps> = ({ word, onReveal, isRevealed = fal
             className="bg-white rounded-3xl shadow-xl p-12 flex flex-col items-center justify-center min-h-[400px]"
           >
             <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">
-              {word.inputLanguage}
+              {frontLang}
             </div>
 
             <div className="text-6xl md:text-7xl font-bold text-slate-900 mb-8 text-center tracking-tight">
-              {word.word}
+              {frontText}
             </div>
 
             <button
@@ -70,11 +94,11 @@ export const FlashCard: FC<FlashCardProps> = ({ word, onReveal, isRevealed = fal
             className="bg-white rounded-3xl shadow-xl p-8 min-h-[400px] flex flex-col"
           >
             <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 text-center">
-              {word.outputLanguage}
+              {backLang}
             </div>
 
             <div className="text-5xl font-bold text-slate-900 mb-6 text-center tracking-tight">
-              {word.translation}
+              {backText}
             </div>
 
             <div className="flex-1 space-y-4">
