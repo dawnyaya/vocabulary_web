@@ -29,7 +29,7 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
         }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 150,
+          maxOutputTokens: 300,
         }
       }),
     });
@@ -85,12 +85,14 @@ Include:
 Respond ONLY with the tip in ${outputLangName}, no extra explanation.`;
 
     const tip = await callGeminiAPI(prompt);
+    console.log('💡 Raw AI tip:', tip);
 
     // Clean up the response
     const cleanTip = tip
       .replace(/^(Tip:|Memorization tip:|Here's a tip:)/i, '')
       .trim();
 
+    console.log('💡 Cleaned tip:', cleanTip);
     return cleanTip || `💡 Associate "${word}" with "${translation}" through visualization.`;
   } catch (error) {
     console.error('Error generating memorization tip:', error);
@@ -126,14 +128,19 @@ Requirements:
 Sentence:`;
 
     const sentence = await callGeminiAPI(prompt);
+    console.log('📝 Raw AI sentence:', sentence);
 
-    // Clean up the response
-    const cleanSentence = sentence
-      .replace(/^(Sentence:|Example:|Here's an example:|Here is|This is)/i, '')
-      .replace(/^["']|["']$/g, '')
+    // Clean up the response - only remove explicit labels, not sentence content
+    let cleanSentence = sentence.trim();
+
+    // Remove common prefixes that are labels (with colon or quotes)
+    cleanSentence = cleanSentence
+      .replace(/^(Sentence:|Example:|Here's an example:|Here is an example:)\s*/i, '')
+      .replace(/^["'](.+)["']$/s, '$1')  // Remove surrounding quotes
       .replace(/^:\s*/, '')
       .trim();
 
+    console.log('📝 Cleaned sentence:', cleanSentence);
     return cleanSentence || `Example with "${word}" (generated)`;
   } catch (error) {
     console.error('Error generating example sentence:', error);
