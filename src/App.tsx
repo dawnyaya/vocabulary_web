@@ -14,33 +14,33 @@ const Navigation: FC = () => {
   }
 
   return (
-    <nav className="bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white/60 backdrop-blur-md border-b border-black/5 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between h-16">
           <div className="flex items-center gap-8">
             <Link
               to="/"
-              className="text-2xl font-bold text-gray-900"
+              className="text-2xl font-bold text-charcoal tracking-tight"
             >
               Memoloop
             </Link>
-            <div className="flex gap-4">
+            <div className="flex gap-2">
               <Link
                 to="/add"
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
                   location.pathname === '/add'
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30'
+                    : 'text-gray-600 hover:bg-gray-100/60'
                 }`}
               >
                 Add Word
               </Link>
               <Link
                 to="/review"
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
                   location.pathname === '/review'
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30'
+                    : 'text-gray-600 hover:bg-gray-100/60'
                 }`}
               >
                 Review
@@ -61,7 +61,7 @@ const App: FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-off-white">
         <Navigation />
         <Routes>
           <Route path="/" element={<HomePage />} />

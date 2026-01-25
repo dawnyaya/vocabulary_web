@@ -11,8 +11,8 @@ export const AddWordPage: FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-off-white py-12 px-6">
+      <div className="max-w-3xl mx-auto">
         <AddWord onSave={handleSave} />
       </div>
     </div>

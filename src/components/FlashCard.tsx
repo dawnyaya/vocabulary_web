@@ -27,15 +27,15 @@ export const FlashCard: FC<FlashCardProps> = ({ word }) => {
         <div className="flip-card-inner h-80">
           {/* Front of card - shows the word */}
           <div className="flip-card-front">
-            <div className="h-full bg-gray-900 rounded-2xl border-2 border-gray-900 p-8 flex flex-col items-center justify-center text-white">
-              <div className="text-sm uppercase tracking-wide text-gray-400 mb-2">
+            <div className="h-full bg-charcoal rounded-3xl border border-charcoal/20 p-8 flex flex-col items-center justify-center text-white shadow-2xl shadow-charcoal/20">
+              <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
                 {word.inputLanguage}
               </div>
-              <div className="text-5xl font-bold mb-6 text-center">{word.word}</div>
+              <div className="text-5xl md:text-6xl font-bold mb-8 text-center tracking-tight">{word.word}</div>
 
               <button
                 onClick={handleSpeak}
-                className="bg-white bg-opacity-10 hover:bg-opacity-20 rounded-full p-4 transition-all duration-200 hover:scale-110"
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-4 transition-all duration-200 hover:scale-110 border border-white/10"
                 aria-label="Pronounce word"
               >
                 <svg
@@ -51,37 +51,37 @@ export const FlashCard: FC<FlashCardProps> = ({ word }) => {
                 </svg>
               </button>
 
-              <div className="mt-8 text-sm text-gray-400">Click to reveal translation</div>
+              <div className="mt-8 text-sm text-gray-400 font-medium">Click to reveal translation</div>
             </div>
           </div>
 
           {/* Back of card - shows translation and additional info */}
           <div className="flip-card-back">
-            <div className="h-full bg-white rounded-2xl border-2 border-gray-900 p-8 flex flex-col items-center justify-center text-gray-900">
-              <div className="text-sm uppercase tracking-wide text-gray-500 mb-2">
+            <div className="h-full bg-white/90 backdrop-blur-md rounded-3xl border border-black/10 p-8 flex flex-col items-center justify-center text-charcoal shadow-2xl shadow-charcoal/10">
+              <div className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3">
                 {word.outputLanguage}
               </div>
-              <div className="text-4xl font-bold mb-6 text-center">{word.translation}</div>
+              <div className="text-4xl md:text-5xl font-bold mb-6 text-center tracking-tight">{word.translation}</div>
 
               {word.memorizationTip && (
-                <div className="bg-gray-100 rounded-lg p-4 mb-4 w-full">
-                  <div className="text-xs uppercase tracking-wide text-gray-600 mb-1">
+                <div className="bg-brand-50/80 backdrop-blur-sm rounded-2xl border border-brand-100 p-4 mb-4 w-full">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-brand-600 mb-2">
                     Tip
                   </div>
-                  <div className="text-sm text-gray-900">{word.memorizationTip}</div>
+                  <div className="text-sm text-charcoal leading-relaxed">{word.memorizationTip}</div>
                 </div>
               )}
 
               {word.exampleSentence && (
-                <div className="bg-gray-100 rounded-lg p-4 w-full">
-                  <div className="text-xs uppercase tracking-wide text-gray-600 mb-1">
+                <div className="bg-gray-100/80 backdrop-blur-sm rounded-2xl border border-gray-200 p-4 w-full">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
                     Example
                   </div>
-                  <div className="text-sm italic text-gray-900">{word.exampleSentence}</div>
+                  <div className="text-sm italic text-charcoal leading-relaxed">{word.exampleSentence}</div>
                 </div>
               )}
 
-              <div className="mt-8 text-sm text-gray-500">Click to flip back</div>
+              <div className="mt-8 text-sm text-gray-500 font-medium">Click to flip back</div>
             </div>
           </div>
         </div>
