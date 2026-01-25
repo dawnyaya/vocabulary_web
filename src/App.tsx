@@ -4,6 +4,7 @@ import { HomePage } from './pages/HomePage';
 import { AddWordPage } from './pages/AddWordPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { LoginPage } from './pages/LoginPage';
+import { CollectionPage } from './pages/CollectionPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { signOut } from './services/auth';
@@ -13,8 +14,8 @@ const Navigation: FC = () => {
   const location = useLocation();
   const { user } = useAuth();
 
-  // Don't show navigation on home page or login page
-  if (location.pathname === '/' || location.pathname === '/login') {
+  // Don't show navigation on login page
+  if (location.pathname === '/login') {
     return null;
   }
 
@@ -26,10 +27,14 @@ const Navigation: FC = () => {
     }
   };
 
+  const isHomePage = location.pathname === '/';
+  const isCollectionPage = location.pathname === '/collection';
+  const showPageToggle = isHomePage || isCollectionPage;
+
   return (
     <nav className="bg-white/60 backdrop-blur-md border-b border-black/5 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-8">
             <Link
               to="/"
@@ -37,28 +42,58 @@ const Navigation: FC = () => {
             >
               Memoloop
             </Link>
-            <div className="flex gap-2">
-              <Link
-                to="/add"
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
-                  location.pathname === '/add'
-                    ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30'
-                    : 'text-gray-600 hover:bg-gray-100/60'
-                }`}
-              >
-                Add Word
-              </Link>
-              <Link
-                to="/review"
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
-                  location.pathname === '/review'
-                    ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30'
-                    : 'text-gray-600 hover:bg-gray-100/60'
-                }`}
-              >
-                Review
-              </Link>
-            </div>
+
+            {/* Dashboard / Collection Toggle - Only show on home and collection pages */}
+            {showPageToggle && (
+              <div className="hidden md:flex items-center gap-1 bg-gray-100/80 backdrop-blur-sm rounded-2xl p-1">
+                <Link
+                  to="/"
+                  className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                    isHomePage
+                      ? 'bg-white text-charcoal shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/collection"
+                  className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                    isCollectionPage
+                      ? 'bg-white text-charcoal shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Collection
+                </Link>
+              </div>
+            )}
+
+            {/* Add/Review buttons - Only show on other pages */}
+            {!showPageToggle && (
+              <div className="flex gap-2">
+                <Link
+                  to="/add"
+                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                    location.pathname === '/add'
+                      ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30'
+                      : 'text-gray-600 hover:bg-gray-100/60'
+                  }`}
+                >
+                  Add Word
+                </Link>
+                <Link
+                  to="/review"
+                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                    location.pathname === '/review'
+                      ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30'
+                      : 'text-gray-600 hover:bg-gray-100/60'
+                  }`}
+                >
+                  Review
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* User Profile & Sign Out */}
@@ -108,6 +143,14 @@ const App: FC = () => {
               element={
                 <ProtectedRoute>
                   <HomePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/collection"
+              element={
+                <ProtectedRoute>
+                  <CollectionPage />
                 </ProtectedRoute>
               }
             />
