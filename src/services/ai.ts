@@ -33,7 +33,7 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
         }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 500, // Increased from 300 to 500
+          maxOutputTokens: 1000, // Increased to handle longer responses
         }
       }),
     });
@@ -82,26 +82,29 @@ export const generateMemorizationTip = async (
     const inputLangName = getLanguageName(inputLang);
     const outputLangName = getLanguageName(outputLang);
 
-    const prompt = `Create a memorization tip in ${outputLangName} to help remember the ${inputLangName} word "${word}" which means "${translation}".
+    const prompt = `Generate a memorization tip in ${outputLangName} for the ${inputLangName} word "${word}" (meaning: "${translation}").
 
-Include:
-1. A pronunciation hint or sound association to help remember how to say "${word}"
-2. A simple visual or story-based memory technique
-3. Keep it natural and under 40 words
+Include a pronunciation hint and a visual/story memory technique. Keep it under 50 words, natural and conversational.
 
-IMPORTANT: Write the ENTIRE tip in ${outputLangName} language only. Do not mix languages.
-
-Tip:`;
+Write ONLY in ${outputLangName}. Output the tip directly without any prefix.`;
 
     const tip = await callGeminiAPI(prompt);
-    console.log('Raw AI tip:', tip);
+    console.log('=== RAW TIP ===');
+    console.log('Length:', tip.length);
+    console.log('Content:', tip);
+    console.log('===============');
 
-    // Clean up the response
+    // Clean up the response - remove common prefixes but keep the content
     const cleanTip = tip
-      .replace(/^(Tip:|Memorization tip:|Here's a tip:)/i, '')
+      .replace(/^(Tip:|Memorization tip:|Here's a tip:|Here is a tip:)\s*/i, '')
+      .replace(/^["'](.*)["']$/s, '$1') // Remove surrounding quotes
       .trim();
 
-    console.log('Cleaned tip:', cleanTip);
+    console.log('=== CLEANED TIP ===');
+    console.log('Length:', cleanTip.length);
+    console.log('Content:', cleanTip);
+    console.log('===================');
+
     return cleanTip || `Associate "${word}" with "${translation}" through visualization.`;
   } catch (error) {
     console.error('Error generating memorization tip:', error);
