@@ -167,3 +167,97 @@ Sentence:`;
     }
   }
 };
+
+// All-in-one generation: translation, tip, and example in a single API call
+export const generateAllContent = async (
+  word: string,
+  inputLang: Language,
+  outputLang: Language
+): Promise<{ translation: string; tip: string; example: string }> => {
+  try {
+    const inputLangName = getLanguageName(inputLang);
+    const outputLangName = getLanguageName(outputLang);
+
+    const prompt = `You are a vocabulary learning assistant. Given a word in ${inputLangName}, provide:
+1. Translation to ${outputLangName}
+2. A memorization tip in ${outputLangName} (include pronunciation hint and visual/story technique, under 50 words)
+3. An example sentence in ${inputLangName} (natural spoken style, under 30 words)
+
+Word: "${word}"
+
+IMPORTANT: Return ONLY a valid JSON object with this exact structure:
+{
+  "translation": "the ${outputLangName} translation",
+  "tip": "memorization tip in ${outputLangName}",
+  "example": "example sentence in ${inputLangName}"
+}
+
+Do not include any text before or after the JSON. Output pure JSON only.`;
+
+    console.log('=== All-in-One Generation Request ===');
+    console.log(`Word: "${word}"`);
+    console.log(`${inputLangName} → ${outputLangName}`);
+    console.log('======================================');
+
+    const response = await callGeminiAPI(prompt);
+    console.log('=== Raw Response ===');
+    console.log(response);
+    console.log('====================');
+
+    // Clean the response - remove markdown code blocks if present
+    let cleanedResponse = response.trim();
+
+    // Remove markdown JSON code blocks
+    cleanedResponse = cleanedResponse
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+
+    console.log('=== Cleaned Response ===');
+    console.log(cleanedResponse);
+    console.log('========================');
+
+    // Parse JSON
+    const parsed = JSON.parse(cleanedResponse);
+
+    // Validate structure
+    if (!parsed.translation || !parsed.tip || !parsed.example) {
+      throw new Error('Invalid JSON structure from API');
+    }
+
+    console.log('=== Parsed Result ===');
+    console.log('Translation:', parsed.translation);
+    console.log('Tip:', parsed.tip);
+    console.log('Example:', parsed.example);
+    console.log('=====================');
+
+    return {
+      translation: parsed.translation.trim(),
+      tip: parsed.tip.trim(),
+      example: parsed.example.trim(),
+    };
+  } catch (error) {
+    console.error('Error in all-in-one generation:', error);
+
+    // Fallback: use individual functions
+    console.log('Falling back to individual API calls...');
+
+    try {
+      const [translation, tip, example] = await Promise.all([
+        translateText(word, inputLang, outputLang),
+        generateMemorizationTip(word, word, inputLang, outputLang).catch(() => 'Memory tip unavailable'),
+        generateExampleSentence(word, inputLang).catch(() => 'Example unavailable'),
+      ]);
+
+      return { translation, tip, example };
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      return {
+        translation: `[Translation unavailable]`,
+        tip: `Associate "${word}" with its meaning through repetition.`,
+        example: `Example with "${word}".`,
+      };
+    }
+  }
+};

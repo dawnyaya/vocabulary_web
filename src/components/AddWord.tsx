@@ -1,7 +1,6 @@
 import { FC, useState } from 'react';
 import { Language, VocabularyWord } from '../types';
-import { translateText } from '../services/translation';
-import { generateMemorizationTip, generateExampleSentence } from '../services/ai';
+import { generateAllContent } from '../services/ai';
 import { speakText } from '../services/textToSpeech';
 
 interface AddWordProps {
@@ -15,69 +14,27 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
   const [translation, setTranslation] = useState('');
   const [memorizationTip, setMemorizationTip] = useState('');
   const [exampleSentence, setExampleSentence] = useState('');
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [isGeneratingTip, setIsGeneratingTip] = useState(false);
-  const [isGeneratingExample, setIsGeneratingExample] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const languages: Language[] = ['chinese', 'english', 'japanese'];
 
-  // DEBUG: Log environment variable on component mount
-  console.log('DEBUG - Environment Check:');
-  console.log('API Key exists:', !!import.meta.env.VITE_GEMINI_API_KEY);
-  console.log('API Key length:', import.meta.env.VITE_GEMINI_API_KEY?.length || 0);
-  console.log('First 10 chars:', import.meta.env.VITE_GEMINI_API_KEY?.substring(0, 10) || 'N/A');
-
-  const handleAutoTranslate = async () => {
+  // All-in-one AI generation handler
+  const handleAutoGenerate = async () => {
     if (!word.trim()) return;
 
-    setIsTranslating(true);
+    setIsGenerating(true);
     try {
-      const result = await translateText(word, inputLanguage, outputLanguage);
-      setTranslation(result);
+      const result = await generateAllContent(word, inputLanguage, outputLanguage);
+
+      // Auto-fill all three fields
+      setTranslation(result.translation);
+      setMemorizationTip(result.tip);
+      setExampleSentence(result.example);
     } catch (error) {
-      console.error('Translation error:', error);
+      console.error('AI generation error:', error);
+      alert('Failed to generate content. Please try again.');
     } finally {
-      setIsTranslating(false);
-    }
-  };
-
-  const handleGenerateTip = async () => {
-    if (!word.trim()) return;
-
-    setIsGeneratingTip(true);
-    try {
-      // Auto-translate if translation is not provided yet
-      let currentTranslation = translation.trim();
-      if (!currentTranslation) {
-        currentTranslation = await translateText(word, inputLanguage, outputLanguage);
-        setTranslation(currentTranslation);
-      }
-
-      const tip = await generateMemorizationTip(
-        word,
-        currentTranslation,
-        inputLanguage,
-        outputLanguage
-      );
-      setMemorizationTip(tip);
-    } catch (error) {
-      console.error('Tip generation error:', error);
-    } finally {
-      setIsGeneratingTip(false);
-    }
-  };
-
-  const handleGenerateExample = async () => {
-    if (!word.trim()) return;
-
-    setIsGeneratingExample(true);
-    try {
-      const example = await generateExampleSentence(word, inputLanguage);
-      setExampleSentence(example);
-    } catch (error) {
-      console.error('Example generation error:', error);
-    } finally {
-      setIsGeneratingExample(false);
+      setIsGenerating(false);
     }
   };
 
@@ -180,79 +137,72 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
         </div>
       </div>
 
+      {/* AI Auto-Generate Button */}
+      <div className="mb-8">
+        <button
+          type="button"
+          onClick={handleAutoGenerate}
+          disabled={isGenerating || !word.trim()}
+          className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-brand-500/30 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none text-lg"
+        >
+          {isGenerating ? (
+            <div className="flex items-center justify-center gap-3">
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Generating...</span>
+            </div>
+          ) : (
+            '✨ AI Auto-Generate All'
+          )}
+        </button>
+        <p className="text-xs text-gray-500 text-center mt-2">
+          Automatically generate translation, memorization tip, and example sentence
+        </p>
+      </div>
+
       {/* Translation Input */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Translation
         </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={translation}
-            onChange={(e) => setTranslation(e.target.value)}
-            className="flex-1 px-4 py-2.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
-            placeholder="Enter translation..."
-            required
-          />
-          <button
-            type="button"
-            onClick={handleAutoTranslate}
-            disabled={isTranslating || !word.trim()}
-            className="px-5 py-2.5 bg-white border border-charcoal text-charcoal rounded-xl hover:bg-gray-50 transition-all duration-200 disabled:bg-gray-100 disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed font-medium"
-          >
-            {isTranslating ? 'Translating...' : 'Translate'}
-          </button>
-        </div>
+        <input
+          type="text"
+          value={translation}
+          onChange={(e) => setTranslation(e.target.value)}
+          className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
+          placeholder="Translation will be auto-generated..."
+          required
+        />
       </div>
 
       {/* Optional: Memorization Tip */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Memorization Tip (Optional)
+          Memorization Tip
         </label>
-        <div className="flex gap-2">
-          <textarea
-            value={memorizationTip}
-            onChange={(e) => setMemorizationTip(e.target.value)}
-            className="flex-1 px-4 py-2.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
-            placeholder="Add a tip to help remember..."
-            rows={2}
-          />
-          <button
-            type="button"
-            onClick={handleGenerateTip}
-            disabled={isGeneratingTip || !word.trim()}
-            className="px-5 py-2.5 bg-brand-500 text-white rounded-xl hover:bg-brand-600 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap font-medium shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30"
-            title={!word.trim() ? 'Please fill in word first' : 'Generate AI memorization tip'}
-          >
-            {isGeneratingTip ? 'Generating...' : 'AI Tip'}
-          </button>
-        </div>
+        <textarea
+          value={memorizationTip}
+          onChange={(e) => setMemorizationTip(e.target.value)}
+          className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
+          placeholder="Memorization tip will be auto-generated..."
+          rows={3}
+        />
       </div>
 
       {/* Optional: Example Sentence */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Example Sentence (Optional)
+          Example Sentence
         </label>
-        <div className="flex gap-2">
-          <textarea
-            value={exampleSentence}
-            onChange={(e) => setExampleSentence(e.target.value)}
-            className="flex-1 px-4 py-2.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
-            placeholder="Add an example sentence..."
-            rows={2}
-          />
-          <button
-            type="button"
-            onClick={handleGenerateExample}
-            disabled={isGeneratingExample || !word.trim()}
-            className="px-5 py-2.5 bg-brand-500 text-white rounded-xl hover:bg-brand-600 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap font-medium shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30"
-            title={!word.trim() ? 'Please fill in word first' : 'Generate AI example sentence'}
-          >
-            {isGeneratingExample ? 'Generating...' : 'AI Example'}
-          </button>
-        </div>
+        <textarea
+          value={exampleSentence}
+          onChange={(e) => setExampleSentence(e.target.value)}
+          className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
+          placeholder="Example sentence will be auto-generated..."
+          rows={2}
+        />
       </div>
 
       {/* Submit Button */}
