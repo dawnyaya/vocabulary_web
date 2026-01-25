@@ -13,8 +13,8 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
-    // Updated model name - Google renamed gemini-pro to gemini-1.5-flash
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    // Use v1 API with gemini-1.5-flash-latest model
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
     const response = await fetch(url, {
       method: 'POST',
