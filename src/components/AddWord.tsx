@@ -21,6 +21,12 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
 
   const languages: Language[] = ['chinese', 'english', 'japanese'];
 
+  // DEBUG: Log environment variable on component mount
+  console.log('🔍 DEBUG - Environment Check:');
+  console.log('API Key exists:', !!import.meta.env.VITE_GEMINI_API_KEY);
+  console.log('API Key length:', import.meta.env.VITE_GEMINI_API_KEY?.length || 0);
+  console.log('First 10 chars:', import.meta.env.VITE_GEMINI_API_KEY?.substring(0, 10) || 'N/A');
+
   const handleAutoTranslate = async () => {
     if (!word.trim()) return;
 
