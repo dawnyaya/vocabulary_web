@@ -13,6 +13,10 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
+    console.log('=== Sending to Gemini API ===');
+    console.log('Prompt:', prompt);
+    console.log('===========================');
+
     // Use v1beta API with gemini-2.5-flash model
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -29,7 +33,7 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
         }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 300,
+          maxOutputTokens: 500, // Increased from 300 to 500
         }
       }),
     });
@@ -41,7 +45,10 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
     }
 
     const data = await response.json();
-    console.log('Gemini API response:', data);
+    console.log('=== Gemini API Full Response ===');
+    console.log('Full data:', JSON.stringify(data, null, 2));
+    console.log('Finish reason:', data.candidates?.[0]?.finishReason);
+    console.log('================================');
 
     if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
       return data.candidates[0].content.parts[0].text.trim();
