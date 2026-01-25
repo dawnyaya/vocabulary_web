@@ -22,7 +22,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
   const languages: Language[] = ['chinese', 'english', 'japanese'];
 
   // DEBUG: Log environment variable on component mount
-  console.log('🔍 DEBUG - Environment Check:');
+  console.log('DEBUG - Environment Check:');
   console.log('API Key exists:', !!import.meta.env.VITE_GEMINI_API_KEY);
   console.log('API Key length:', import.meta.env.VITE_GEMINI_API_KEY?.length || 0);
   console.log('First 10 chars:', import.meta.env.VITE_GEMINI_API_KEY?.substring(0, 10) || 'N/A');
@@ -42,13 +42,20 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
   };
 
   const handleGenerateTip = async () => {
-    if (!word.trim() || !translation.trim()) return;
+    if (!word.trim()) return;
 
     setIsGeneratingTip(true);
     try {
+      // Auto-translate if translation is not provided yet
+      let currentTranslation = translation.trim();
+      if (!currentTranslation) {
+        currentTranslation = await translateText(word, inputLanguage, outputLanguage);
+        setTranslation(currentTranslation);
+      }
+
       const tip = await generateMemorizationTip(
         word,
-        translation,
+        currentTranslation,
         inputLanguage,
         outputLanguage
       );
@@ -168,7 +175,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             title="Pronounce"
           >
-            🔊
+            Speak
           </button>
         </div>
       </div>
@@ -193,7 +200,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             disabled={isTranslating || !word.trim()}
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            {isTranslating ? '...' : '🌐 Auto'}
+            {isTranslating ? 'Translating...' : 'Translate'}
           </button>
         </div>
       </div>
@@ -214,11 +221,11 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
           <button
             type="button"
             onClick={handleGenerateTip}
-            disabled={isGeneratingTip || !word.trim() || !translation.trim()}
+            disabled={isGeneratingTip || !word.trim()}
             className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
-            title={!word.trim() || !translation.trim() ? 'Please fill in word and translation first' : 'Generate AI memorization tip'}
+            title={!word.trim() ? 'Please fill in word first' : 'Generate AI memorization tip'}
           >
-            {isGeneratingTip ? '...' : '💡 AI'}
+            {isGeneratingTip ? 'Generating...' : 'AI Tip'}
           </button>
         </div>
       </div>
@@ -243,7 +250,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
             title={!word.trim() ? 'Please fill in word first' : 'Generate AI example sentence'}
           >
-            {isGeneratingExample ? '...' : '📝 AI'}
+            {isGeneratingExample ? 'Generating...' : 'AI Example'}
           </button>
         </div>
       </div>

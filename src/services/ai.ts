@@ -8,7 +8,7 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
   try {
     // Check if API key is available
     if (!GEMINI_API_KEY) {
-      console.warn('⚠️ No Gemini API key found. Please add VITE_GEMINI_API_KEY to your .env file');
+      console.warn('No Gemini API key found. Please add VITE_GEMINI_API_KEY to your .env file');
       console.warn('Get a free key at: https://aistudio.google.com/app/apikey');
       throw new Error('API key not configured');
     }
@@ -87,28 +87,28 @@ IMPORTANT: Write the ENTIRE tip in ${outputLangName} language only. Do not mix l
 Tip:`;
 
     const tip = await callGeminiAPI(prompt);
-    console.log('💡 Raw AI tip:', tip);
+    console.log('Raw AI tip:', tip);
 
     // Clean up the response
     const cleanTip = tip
       .replace(/^(Tip:|Memorization tip:|Here's a tip:)/i, '')
       .trim();
 
-    console.log('💡 Cleaned tip:', cleanTip);
-    return cleanTip || `💡 Associate "${word}" with "${translation}" through visualization.`;
+    console.log('Cleaned tip:', cleanTip);
+    return cleanTip || `Associate "${word}" with "${translation}" through visualization.`;
   } catch (error) {
     console.error('Error generating memorization tip:', error);
 
     // Smart fallback based on languages
     if (inputLang === 'chinese' && outputLang === 'english') {
-      return `💡 Try to remember the pronunciation and meaning of "${word}" by associating it with "${translation}". Practice writing the character to help memorize it.`;
+      return `Try to remember the pronunciation and meaning of "${word}" by associating it with "${translation}". Practice writing the character to help memorize it.`;
     } else if (inputLang === 'english' && outputLang === 'chinese') {
-      return `💡 记住"${word}"的意思是"${translation}"，可以通过联想和重复来加深记忆。`;
+      return `记住"${word}"的意思是"${translation}"，可以通过联想和重复来加深记忆。`;
     } else if (inputLang === 'japanese') {
-      return `💡 Try to remember "${word}" means "${translation}" by associating the sounds or creating a visual memory.`;
+      return `Try to remember "${word}" means "${translation}" by associating the sounds or creating a visual memory.`;
     }
 
-    return `💡 Practice "${word}" = "${translation}" repeatedly. Create a mental image or story to connect them.`;
+    return `Practice "${word}" = "${translation}" repeatedly. Create a mental image or story to connect them.`;
   }
 };
 
@@ -130,7 +130,7 @@ Requirements:
 Sentence:`;
 
     const sentence = await callGeminiAPI(prompt);
-    console.log('📝 Raw AI sentence:', sentence);
+    console.log('Raw AI sentence:', sentence);
 
     // Clean up the response - only remove explicit labels, not sentence content
     let cleanSentence = sentence.trim();
@@ -142,7 +142,7 @@ Sentence:`;
       .replace(/^:\s*/, '')
       .trim();
 
-    console.log('📝 Cleaned sentence:', cleanSentence);
+    console.log('Cleaned sentence:', cleanSentence);
     return cleanSentence || `Example with "${word}" (generated)`;
   } catch (error) {
     console.error('Error generating example sentence:', error);
