@@ -78,11 +78,13 @@ export const generateMemorizationTip = async (
     const prompt = `Create a memorization tip in ${outputLangName} to help remember the ${inputLangName} word "${word}" which means "${translation}".
 
 Include:
-1. A pronunciation hint or sound association
-2. A visual or story-based memory technique
-3. Keep it under 40 words
+1. A pronunciation hint or sound association to help remember how to say "${word}"
+2. A simple visual or story-based memory technique
+3. Keep it natural and under 40 words
 
-Respond ONLY with the tip in ${outputLangName}, no extra explanation.`;
+IMPORTANT: Write the ENTIRE tip in ${outputLangName} language only. Do not mix languages.
+
+Tip:`;
 
     const tip = await callGeminiAPI(prompt);
     console.log('💡 Raw AI tip:', tip);
