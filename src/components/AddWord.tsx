@@ -216,6 +216,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             onClick={handleGenerateTip}
             disabled={isGeneratingTip || !word.trim() || !translation.trim()}
             className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
+            title={!word.trim() || !translation.trim() ? 'Please fill in word and translation first' : 'Generate AI memorization tip'}
           >
             {isGeneratingTip ? '...' : '💡 AI'}
           </button>
@@ -240,6 +241,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
             onClick={handleGenerateExample}
             disabled={isGeneratingExample || !word.trim()}
             className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
+            title={!word.trim() ? 'Please fill in word first' : 'Generate AI example sentence'}
           >
             {isGeneratingExample ? '...' : '📝 AI'}
           </button>
