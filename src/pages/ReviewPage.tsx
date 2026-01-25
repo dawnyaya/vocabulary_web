@@ -4,7 +4,7 @@ import { storageService } from '../services/storage';
 import { getDueWords, updateWordProgress } from '../services/spacedRepetition';
 import { FlashCard } from '../components/FlashCard';
 
-type DifficultyLevel = 'again' | 'hard' | 'good' | 'easy';
+type DifficultyLevel = 'again' | 'good' | 'easy';
 
 export const ReviewPage: FC = () => {
   const [dueWords, setDueWords] = useState<WordWithProgress[]>([]);
@@ -49,7 +49,6 @@ export const ReviewPage: FC = () => {
     // Map difficulty to familiarity level for existing progress system
     const familiarityMap = {
       'again': 'not-familiar',
-      'hard': 'not-familiar',
       'good': 'little-familiar',
       'easy': 'very-familiar',
     } as const;
@@ -143,31 +142,33 @@ export const ReviewPage: FC = () => {
 
         {/* Assessment Buttons - Only show when revealed */}
         {isRevealed && (
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-[500px] mx-auto">
-            <button
-              onClick={() => handleDifficultySelect('again')}
-              className="py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
-            >
-              Again
-            </button>
-            <button
-              onClick={() => handleDifficultySelect('hard')}
-              className="py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
-            >
-              Hard
-            </button>
-            <button
-              onClick={() => handleDifficultySelect('good')}
-              className="py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
-            >
-              Good
-            </button>
-            <button
-              onClick={() => handleDifficultySelect('easy')}
-              className="py-3 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
-            >
-              Easy
-            </button>
+          <div className="mt-8 max-w-[500px] mx-auto">
+            <div className="text-xs font-semibold text-gray-500 text-center mb-3 uppercase tracking-wider">
+              How well did you know this?
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                onClick={() => handleDifficultySelect('again')}
+                className="py-4 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-2xl transition-all duration-200 border border-slate-200 hover:border-slate-300"
+              >
+                <div className="text-lg mb-1">Again</div>
+                <div className="text-xs font-normal text-slate-500">Tomorrow</div>
+              </button>
+              <button
+                onClick={() => handleDifficultySelect('good')}
+                className="py-4 px-6 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-2xl transition-all duration-200 shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30"
+              >
+                <div className="text-lg mb-1">Good</div>
+                <div className="text-xs font-normal text-brand-50">2 days</div>
+              </button>
+              <button
+                onClick={() => handleDifficultySelect('easy')}
+                className="py-4 px-6 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold rounded-2xl transition-all duration-200 border border-brand-200 hover:border-brand-300"
+              >
+                <div className="text-lg mb-1">Easy</div>
+                <div className="text-xs font-normal text-brand-600">3+ days</div>
+              </button>
+            </div>
           </div>
         )}
       </div>
