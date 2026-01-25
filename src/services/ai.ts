@@ -1,4 +1,5 @@
 import { Language } from '../types';
+import { translateText } from './translation';
 
 // Get API key from environment variable (Vite uses import.meta.env)
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -207,11 +208,12 @@ Do not include any text before or after the JSON. Output pure JSON only.`;
     // Clean the response - remove markdown code blocks if present
     let cleanedResponse = response.trim();
 
-    // Remove markdown JSON code blocks
+    // Remove markdown JSON code blocks (more aggressive cleaning)
     cleanedResponse = cleanedResponse
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/\s*```$/i, '')
+      .replace(/^```json\s*/im, '')
+      .replace(/^```\s*/im, '')
+      .replace(/\s*```$/im, '')
+      .replace(/^.*?({[\s\S]*}).*$/m, '$1') // Extract JSON object if wrapped in text
       .trim();
 
     console.log('=== Cleaned Response ===');
@@ -219,7 +221,14 @@ Do not include any text before or after the JSON. Output pure JSON only.`;
     console.log('========================');
 
     // Parse JSON
-    const parsed = JSON.parse(cleanedResponse);
+    let parsed;
+    try {
+      parsed = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error('JSON Parse Error:', parseError);
+      console.error('Failed to parse:', cleanedResponse);
+      throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+    }
 
     // Validate structure
     if (!parsed.translation || !parsed.tip || !parsed.example) {
