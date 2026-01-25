@@ -25,13 +25,10 @@ export const HomePage: FC = () => {
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold text-gray-900 mb-4">
-            Vocabulary Flashcards
+        <div className="mb-12">
+          <h1 className="text-6xl font-bold text-gray-900">
+            Memoloop
           </h1>
-          <p className="text-xl text-gray-600">
-            Learn and memorize vocabulary with spaced repetition
-          </p>
         </div>
 
         {/* Stats */}
@@ -53,9 +50,9 @@ export const HomePage: FC = () => {
         {/* Action Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Link to="/add">
-            <div className="bg-gray-900 rounded-2xl border-2 border-gray-900 p-8 text-white hover:bg-gray-800 transition-all duration-200 cursor-pointer">
+            <div className="bg-white rounded-2xl border-2 border-gray-900 p-8 text-gray-900 hover:bg-gray-50 transition-all duration-200 cursor-pointer">
               <h2 className="text-2xl font-bold mb-2">Add New Word</h2>
-              <p className="text-gray-300">
+              <p className="text-gray-600">
                 Add vocabulary words with translations and examples
               </p>
             </div>

@@ -22,7 +22,7 @@ const Navigation: FC = () => {
               to="/"
               className="text-2xl font-bold text-gray-900"
             >
-              Vocabulary
+              Memoloop
             </Link>
             <div className="flex gap-4">
               <Link
