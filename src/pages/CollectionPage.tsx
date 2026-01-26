@@ -128,7 +128,7 @@ export const CollectionPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-off-white">
+    <div className="min-h-screen bg-gradient-to-br from-off-white via-blue-50/30 to-purple-50/20">
       {/* Sidebar */}
       <div
         className="fixed left-0 top-0 h-full z-40"
@@ -143,12 +143,22 @@ export const CollectionPage: FC = () => {
           initial={{ x: '-80%' }}
           animate={{ x: isSidebarHovered ? 0 : '-80%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="h-full w-64 bg-white/80 backdrop-blur-md border-r border-black/5 shadow-xl relative"
+          className="h-full w-64 bg-white/50 backdrop-blur-xl border-r border-white/20 shadow-2xl shadow-black/5 relative"
+          style={{
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          }}
         >
           {/* Visible edge hint when collapsed */}
           {!isSidebarHovered && (
             <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full">
-              <div className="bg-brand-500/90 text-white px-2 py-4 rounded-r-lg text-xs font-semibold backdrop-blur-sm shadow-lg flex items-center gap-1">
+              <div
+                className="bg-brand-500/80 text-white px-2 py-4 rounded-r-lg text-xs font-semibold shadow-lg flex items-center gap-1"
+                style={{
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                }}
+              >
                 <ChevronRight className="w-3 h-3" />
                 <span style={{ writingMode: 'vertical-rl' }} className="text-[10px] tracking-wider">
                   COLLECTIONS
@@ -167,8 +177,8 @@ export const CollectionPage: FC = () => {
               onClick={() => handleCollectionClick('all')}
               className={`w-full text-left px-4 py-3 rounded-xl mb-2 transition-all duration-200 ${
                 !collectionId
-                  ? 'bg-brand-500 text-white shadow-lg'
-                  : 'hover:bg-gray-100 text-gray-700'
+                  ? 'bg-brand-500/90 text-white shadow-lg backdrop-blur-sm'
+                  : 'hover:bg-white/40 text-gray-700'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -191,8 +201,8 @@ export const CollectionPage: FC = () => {
                   onClick={() => handleCollectionClick(col.id)}
                   className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${
                     collectionId === col.id
-                      ? 'bg-brand-500 text-white shadow-lg'
-                      : 'hover:bg-gray-100 text-gray-700'
+                      ? 'bg-brand-500/90 text-white shadow-lg backdrop-blur-sm'
+                      : 'hover:bg-white/40 text-gray-700'
                   }`}
                 >
                   <div className="flex items-center gap-3">
