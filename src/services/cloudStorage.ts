@@ -208,4 +208,33 @@ export const cloudStorageService = {
       return [];
     }
   },
+
+  // Ensure default "General" collection exists
+  async ensureDefaultCollection(userId: string): Promise<Collection> {
+    try {
+      const collections = await this.getCollections(userId);
+
+      // Check if General collection already exists
+      let generalCollection = collections.find(c => c.name === 'General');
+
+      if (!generalCollection) {
+        // Create default General collection
+        generalCollection = {
+          id: 'general-' + Date.now(),
+          name: 'General',
+          emoji: '📝',
+          gradient: 'bg-gradient-to-br from-gray-100 to-slate-100',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        await this.addCollection(userId, generalCollection);
+      }
+
+      return generalCollection;
+    } catch (error) {
+      console.error('Error ensuring default collection:', error);
+      throw error;
+    }
+  },
 };

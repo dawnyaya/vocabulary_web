@@ -22,11 +22,22 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
 
   const languages: Language[] = ['chinese', 'english', 'japanese'];
 
-  // Load last used collection from localStorage
+  // Load last used collection from localStorage, or default to General
   useEffect(() => {
+    if (collections.length === 0) return;
+
     const lastCollectionId = localStorage.getItem(LAST_COLLECTION_KEY);
     if (lastCollectionId && collections.some(c => c.id === lastCollectionId)) {
       setSelectedCollectionId(lastCollectionId);
+    } else {
+      // Default to General collection if available
+      const generalCollection = collections.find(c => c.name === 'General');
+      if (generalCollection) {
+        setSelectedCollectionId(generalCollection.id);
+      } else if (collections.length > 0) {
+        // Fallback to first collection
+        setSelectedCollectionId(collections[0].id);
+      }
     }
   }, [collections]);
 
@@ -64,6 +75,11 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
       return;
     }
 
+    if (!selectedCollectionId) {
+      alert('Please select a collection');
+      return;
+    }
+
     const newWord: VocabularyWord = {
       id: crypto.randomUUID(),
       word: word.trim(),
@@ -72,15 +88,13 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
       outputLanguage,
       memorizationTip: memorizationTip.trim() || undefined,
       exampleSentence: exampleSentence.trim() || undefined,
-      collectionId: selectedCollectionId || undefined,
+      collectionId: selectedCollectionId,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     // Save the selected collection to localStorage for next time
-    if (selectedCollectionId) {
-      localStorage.setItem(LAST_COLLECTION_KEY, selectedCollectionId);
-    }
+    localStorage.setItem(LAST_COLLECTION_KEY, selectedCollectionId);
 
     onSave(newWord);
 
@@ -227,36 +241,36 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
       {/* Submit Section with Collection Selector */}
       <div className="flex gap-3">
         {/* Save to Collection Selector */}
-        {collections.length > 0 && (
-          <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-600 mb-2">
-              Save to
-            </label>
-            <select
-              value={selectedCollectionId}
-              onChange={(e) => setSelectedCollectionId(e.target.value)}
-              className="w-full px-4 py-3.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200 font-medium text-gray-700"
-            >
-              <option value="">📝 No Collection</option>
-              {collections.map((collection) => (
-                <option key={collection.id} value={collection.id}>
-                  {collection.emoji} {collection.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div className="flex-1">
+          <label className="block text-xs font-medium text-gray-600 mb-2">
+            Save to <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={selectedCollectionId}
+            onChange={(e) => setSelectedCollectionId(e.target.value)}
+            className="w-full px-4 py-3.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200 font-medium text-gray-700"
+            required
+          >
+            {collections.length === 0 && (
+              <option value="">Loading...</option>
+            )}
+            {collections.map((collection) => (
+              <option key={collection.id} value={collection.id}>
+                {collection.emoji} {collection.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {/* Save Button */}
-        <div className={collections.length > 0 ? 'flex-1' : 'w-full'}>
-          {collections.length > 0 && (
-            <label className="block text-xs font-medium text-gray-600 mb-2">
-              &nbsp;
-            </label>
-          )}
+        <div className="flex-1">
+          <label className="block text-xs font-medium text-gray-600 mb-2">
+            &nbsp;
+          </label>
           <button
             type="submit"
-            className="w-full py-3.5 bg-charcoal text-white font-semibold rounded-xl hover:bg-charcoal/90 transition-all duration-200 shadow-lg shadow-charcoal/10"
+            disabled={!selectedCollectionId}
+            className="w-full py-3.5 bg-charcoal text-white font-semibold rounded-xl hover:bg-charcoal/90 transition-all duration-200 shadow-lg shadow-charcoal/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save Word
           </button>

@@ -122,7 +122,7 @@ export const CollectionPage: FC = () => {
   const handleDrop = async (e: React.DragEvent, targetCollectionId: string | null) => {
     e.preventDefault();
 
-    if (!draggedWord || !user) return;
+    if (!draggedWord || !user || !targetCollectionId) return;
 
     // Don't do anything if dropping on the same collection
     if (draggedWord.collectionId === targetCollectionId) {
@@ -135,7 +135,7 @@ export const CollectionPage: FC = () => {
       // Update word's collection
       const updatedWord = {
         ...draggedWord,
-        collectionId: targetCollectionId || undefined,
+        collectionId: targetCollectionId,
         updatedAt: new Date(),
       };
 
@@ -145,9 +145,7 @@ export const CollectionPage: FC = () => {
       setWords(words.map(w => w.id === updatedWord.id ? updatedWord : w));
 
       // Show success feedback
-      const collectionName = targetCollectionId
-        ? allCollections.find(c => c.id === targetCollectionId)?.name || 'Collection'
-        : 'No Collection';
+      const collectionName = allCollections.find(c => c.id === targetCollectionId)?.name || 'Collection';
 
       // Simple toast notification (you can enhance this later)
       console.log(`Moved "${draggedWord.word}" to ${collectionName}`);
@@ -235,19 +233,12 @@ export const CollectionPage: FC = () => {
               Collections
             </h3>
 
-            {/* All Words Option */}
-            <div
-              onDragOver={(e) => handleDragOver(e, null)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, null)}
-              className="mb-2"
-            >
+            {/* All Words Option - View only, not a drop target */}
+            <div className="mb-2">
               <button
                 onClick={() => handleCollectionClick('all')}
                 className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${
-                  dropTargetCollection === null && draggedWord
-                    ? 'bg-green-500/90 text-white shadow-lg ring-2 ring-green-400'
-                    : !collectionId
+                  !collectionId
                     ? 'bg-brand-500/90 text-white shadow-lg backdrop-blur-sm'
                     : 'hover:bg-white/40 text-gray-700'
                 }`}

@@ -22,6 +22,9 @@ export const HomePage: FC = () => {
     if (!user) return;
 
     try {
+      // Ensure default collection exists
+      await cloudStorageService.ensureDefaultCollection(user.uid);
+
       const [words, allProgress, allCollections] = await Promise.all([
         cloudStorageService.getWords(user.uid),
         cloudStorageService.getProgress(user.uid),
