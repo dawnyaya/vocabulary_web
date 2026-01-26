@@ -21,6 +21,18 @@ export const CollectionPage: FC = () => {
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
 
+  // Auto-show sidebar on first load
+  useEffect(() => {
+    const hasSeenSidebar = localStorage.getItem('hasSeenCollectionSidebar');
+    if (!hasSeenSidebar) {
+      setIsSidebarHovered(true);
+      setTimeout(() => {
+        setIsSidebarHovered(false);
+        localStorage.setItem('hasSeenCollectionSidebar', 'true');
+      }, 2500);
+    }
+  }, []);
+
   useEffect(() => {
     loadData();
   }, [user, collectionId]);
@@ -131,8 +143,20 @@ export const CollectionPage: FC = () => {
           initial={{ x: '-80%' }}
           animate={{ x: isSidebarHovered ? 0 : '-80%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="h-full w-64 bg-white/80 backdrop-blur-md border-r border-black/5 shadow-xl"
+          className="h-full w-64 bg-white/80 backdrop-blur-md border-r border-black/5 shadow-xl relative"
         >
+          {/* Visible edge hint when collapsed */}
+          {!isSidebarHovered && (
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full">
+              <div className="bg-brand-500/90 text-white px-2 py-4 rounded-r-lg text-xs font-semibold backdrop-blur-sm shadow-lg flex items-center gap-1">
+                <ChevronRight className="w-3 h-3" />
+                <span style={{ writingMode: 'vertical-rl' }} className="text-[10px] tracking-wider">
+                  COLLECTIONS
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="p-6 h-full overflow-y-auto">
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
               Collections
