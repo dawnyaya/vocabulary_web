@@ -14,7 +14,7 @@ export const HomePage: FC = () => {
   const [totalWords, setTotalWords] = useState(0);
   const [dueCount, setDueCount] = useState(0);
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [collectionStats, setCollectionStats] = useState<{ [key: string]: { wordCount: number; reviewCount: number } }>({});
+  const [collectionStats, setCollectionStats] = useState<{ [key: string]: { wordCount: number; reviewCount: number; masteredCount: number } }>({});
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +40,7 @@ export const HomePage: FC = () => {
       setCollections(allCollections);
 
       // Calculate stats for each collection
-      const stats: { [key: string]: { wordCount: number; reviewCount: number } } = {};
+      const stats: { [key: string]: { wordCount: number; reviewCount: number; masteredCount: number } } = {};
       allCollections.forEach((collection) => {
         const collectionWords = words.filter((w) => w.collectionId === collection.id);
         const collectionProgress = allProgress.filter((p) =>
@@ -51,9 +51,15 @@ export const HomePage: FC = () => {
           (word) => !allProgress.find((p) => p.wordId === word.id)
         );
 
+        // Count mastered words (very-familiar)
+        const collectionMastered = collectionProgress.filter(
+          (p) => p.familiarityLevel === 'very-familiar'
+        ).length;
+
         stats[collection.id] = {
           wordCount: collectionWords.length,
           reviewCount: collectionDue.length + collectionNew.length,
+          masteredCount: collectionMastered,
         };
       });
 
@@ -184,6 +190,7 @@ export const HomePage: FC = () => {
                     collection={collection}
                     wordCount={collectionStats[collection.id]?.wordCount || 0}
                     reviewCount={collectionStats[collection.id]?.reviewCount || 0}
+                    masteredCount={collectionStats[collection.id]?.masteredCount || 0}
                     onClick={() => navigate('/collection')}
                   />
                 ))}
