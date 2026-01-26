@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { Language, VocabularyWord, Collection } from '../types';
 import { generateAllContent } from '../services/ai';
 import { speakText } from '../services/textToSpeech';
@@ -7,6 +7,8 @@ interface AddWordProps {
   onSave: (word: VocabularyWord) => void;
   collections?: Collection[];
 }
+
+const LAST_COLLECTION_KEY = 'lastUsedCollectionId';
 
 export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
   const [inputLanguage, setInputLanguage] = useState<Language>('english');
@@ -19,6 +21,14 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const languages: Language[] = ['chinese', 'english', 'japanese'];
+
+  // Load last used collection from localStorage
+  useEffect(() => {
+    const lastCollectionId = localStorage.getItem(LAST_COLLECTION_KEY);
+    if (lastCollectionId && collections.some(c => c.id === lastCollectionId)) {
+      setSelectedCollectionId(lastCollectionId);
+    }
+  }, [collections]);
 
   // All-in-one AI generation handler
   const handleAutoGenerate = async () => {
@@ -67,14 +77,19 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
       updatedAt: new Date(),
     };
 
+    // Save the selected collection to localStorage for next time
+    if (selectedCollectionId) {
+      localStorage.setItem(LAST_COLLECTION_KEY, selectedCollectionId);
+    }
+
     onSave(newWord);
 
-    // Reset form
+    // Reset form (but keep the collection selection)
     setWord('');
     setTranslation('');
     setMemorizationTip('');
     setExampleSentence('');
-    setSelectedCollectionId('');
+    // Don't reset selectedCollectionId - keep it for next word
   };
 
   return (
@@ -117,27 +132,6 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
           </select>
         </div>
       </div>
-
-      {/* Collection Selector */}
-      {collections.length > 0 && (
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Collection (Optional)
-          </label>
-          <select
-            value={selectedCollectionId}
-            onChange={(e) => setSelectedCollectionId(e.target.value)}
-            className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
-          >
-            <option value="">None</option>
-            {collections.map((collection) => (
-              <option key={collection.id} value={collection.id}>
-                {collection.emoji} {collection.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
 
       {/* Word Input */}
       <div className="mb-6">
@@ -230,13 +224,44 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
         />
       </div>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        className="w-full py-3.5 bg-charcoal text-white font-semibold rounded-xl hover:bg-charcoal/90 transition-all duration-200 shadow-lg shadow-charcoal/10"
-      >
-        Save Word
-      </button>
+      {/* Submit Section with Collection Selector */}
+      <div className="flex gap-3">
+        {/* Save to Collection Selector */}
+        {collections.length > 0 && (
+          <div className="flex-1">
+            <label className="block text-xs font-medium text-gray-600 mb-2">
+              Save to
+            </label>
+            <select
+              value={selectedCollectionId}
+              onChange={(e) => setSelectedCollectionId(e.target.value)}
+              className="w-full px-4 py-3.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200 font-medium text-gray-700"
+            >
+              <option value="">📝 No Collection</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.emoji} {collection.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Save Button */}
+        <div className={collections.length > 0 ? 'flex-1' : 'w-full'}>
+          {collections.length > 0 && (
+            <label className="block text-xs font-medium text-gray-600 mb-2">
+              &nbsp;
+            </label>
+          )}
+          <button
+            type="submit"
+            className="w-full py-3.5 bg-charcoal text-white font-semibold rounded-xl hover:bg-charcoal/90 transition-all duration-200 shadow-lg shadow-charcoal/10"
+          >
+            Save Word
+          </button>
+        </div>
+      </div>
     </form>
   );
 };
