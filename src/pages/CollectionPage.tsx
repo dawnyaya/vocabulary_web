@@ -1,46 +1,51 @@
 import { FC, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { cloudStorageService } from '../services/cloudStorage';
 import { useAuth } from '../contexts/AuthContext';
 import { VocabularyWord, Collection } from '../types';
-import { Trash2, Volume2, ArrowLeft } from 'lucide-react';
+import { Trash2, Volume2, ChevronRight } from 'lucide-react';
 import { speakText } from '../services/textToSpeech';
-import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const CollectionPage: FC = () => {
   const { user } = useAuth();
   const { collectionId } = useParams<{ collectionId: string }>();
+  const navigate = useNavigate();
   const [words, setWords] = useState<VocabularyWord[]>([]);
-  const [collection, setCollection] = useState<Collection | null>(null);
+  const [allCollections, setAllCollections] = useState<Collection[]>([]);
+  const [currentCollection, setCurrentCollection] = useState<Collection | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
 
   useEffect(() => {
-    loadWords();
+    loadData();
   }, [user, collectionId]);
 
-  const loadWords = async () => {
+  const loadData = async () => {
     if (!user) return;
 
     setLoading(true);
     try {
+      // Load all collections first
+      const collections = await cloudStorageService.getCollections(user.uid);
+      setAllCollections(collections);
+
       let allWords: VocabularyWord[];
 
       if (collectionId) {
         // Load specific collection and its words
-        const [collections, collectionWords] = await Promise.all([
-          cloudStorageService.getCollections(user.uid),
-          cloudStorageService.getWordsByCollection(user.uid, collectionId),
-        ]);
-
+        const collectionWords = await cloudStorageService.getWordsByCollection(user.uid, collectionId);
         const foundCollection = collections.find(c => c.id === collectionId);
-        setCollection(foundCollection || null);
+        setCurrentCollection(foundCollection || null);
         allWords = collectionWords;
       } else {
         // Load all words
         allWords = await cloudStorageService.getWords(user.uid);
+        setCurrentCollection(null);
       }
 
       // Sort by most recent first
@@ -50,6 +55,15 @@ export const CollectionPage: FC = () => {
       console.error('Error loading words:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCollectionClick = (id: string) => {
+    setAnimationKey(prev => prev + 1); // Trigger animation
+    if (id === 'all') {
+      navigate('/collection');
+    } else {
+      navigate(`/collection/${id}`);
     }
   };
 
@@ -102,40 +116,103 @@ export const CollectionPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-off-white py-8 px-6">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        {collection ? (
-          <div className="mb-8">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+    <div className="min-h-screen bg-off-white">
+      {/* Sidebar */}
+      <div
+        className="fixed left-0 top-0 h-full z-40"
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
+      >
+        {/* Hover trigger area */}
+        <div className="absolute left-0 top-0 w-4 h-full" />
+
+        {/* Sidebar content */}
+        <motion.div
+          initial={{ x: '-80%' }}
+          animate={{ x: isSidebarHovered ? 0 : '-80%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="h-full w-64 bg-white/80 backdrop-blur-md border-r border-black/5 shadow-xl"
+        >
+          <div className="p-6 h-full overflow-y-auto">
+            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
+              Collections
+            </h3>
+
+            {/* All Words Option */}
+            <button
+              onClick={() => handleCollectionClick('all')}
+              className={`w-full text-left px-4 py-3 rounded-xl mb-2 transition-all duration-200 ${
+                !collectionId
+                  ? 'bg-brand-500 text-white shadow-lg'
+                  : 'hover:bg-gray-100 text-gray-700'
+              }`}
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Dashboard
-            </Link>
-            <div className={`${collection.gradient} rounded-3xl p-8 mb-6`}>
-              <div className="flex items-center gap-4">
-                <div className="text-6xl">{collection.emoji}</div>
-                <div>
-                  <h1 className="text-4xl font-bold text-gray-800 mb-1 tracking-tight">
-                    {collection.name}
-                  </h1>
-                  <p className="text-gray-600">
-                    {words.length} {words.length === 1 ? 'word' : 'words'}
-                  </p>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📝</span>
+                <div className="flex-1">
+                  <div className="font-semibold">All Words</div>
+                  <div className={`text-xs ${!collectionId ? 'text-white/80' : 'text-gray-500'}`}>
+                    {words.length} total
+                  </div>
+                </div>
+                {!collectionId && <ChevronRight className="w-5 h-5" />}
+              </div>
+            </button>
+
+            {/* Collections List */}
+            <div className="space-y-2">
+              {allCollections.map((col) => (
+                <button
+                  key={col.id}
+                  onClick={() => handleCollectionClick(col.id)}
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${
+                    collectionId === col.id
+                      ? 'bg-brand-500 text-white shadow-lg'
+                      : 'hover:bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{col.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">{col.name}</div>
+                    </div>
+                    {collectionId === col.id && <ChevronRight className="w-5 h-5" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Main Content */}
+      <div className="ml-0 md:ml-12 py-8 px-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          {currentCollection ? (
+            <div className="mb-8">
+              <div className={`${currentCollection.gradient} rounded-3xl p-8 mb-6`}>
+                <div className="flex items-center gap-4">
+                  <div className="text-6xl">{currentCollection.emoji}</div>
+                  <div>
+                    <h1 className="text-4xl font-bold text-gray-800 mb-1 tracking-tight">
+                      {currentCollection.name}
+                    </h1>
+                    <p className="text-gray-600">
+                      {words.length} {words.length === 1 ? 'word' : 'words'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-charcoal mb-2 tracking-tight">Collection</h1>
-            <p className="text-gray-500">
-              {words.length} {words.length === 1 ? 'word' : 'words'} in your vocabulary
-            </p>
-          </div>
-        )}
+          ) : (
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-charcoal mb-2 tracking-tight">All Words</h1>
+              <p className="text-gray-500">
+                {words.length} {words.length === 1 ? 'word' : 'words'} in your vocabulary
+              </p>
+            </div>
+          )}
 
         {/* Search & Filter */}
         <div className="mb-8 flex flex-col sm:flex-row gap-3">
@@ -158,9 +235,13 @@ export const CollectionPage: FC = () => {
           </select>
         </div>
 
-        {/* Words Grid */}
+        {/* Words Grid with Animation */}
         {filteredWords.length === 0 ? (
-          <div className="text-center py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-20"
+          >
             <div className="inline-block p-4 bg-gray-100 rounded-2xl mb-4">
               <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -169,14 +250,25 @@ export const CollectionPage: FC = () => {
             <p className="text-gray-500 text-lg">
               {searchQuery ? 'No words match your search' : 'No words yet. Start adding some!'}
             </p>
-          </div>
+          </motion.div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredWords.map((word) => (
-              <div
-                key={word.id}
-                className="bg-white rounded-2xl border border-black/5 p-5 hover:border-brand-200 transition-all duration-200 group"
-              >
+          <motion.div
+            key={animationKey}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            <AnimatePresence mode="wait">
+              {filteredWords.map((word, index) => (
+                <motion.div
+                  key={word.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: index * 0.05,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                  className="bg-white rounded-2xl border border-black/5 p-5 hover:border-brand-200 transition-all duration-200 group"
+                >
                 {/* Word & Translation */}
                 <div className="mb-4">
                   <div className="flex items-start justify-between mb-2">
@@ -247,10 +339,12 @@ export const CollectionPage: FC = () => {
                     Added {new Date(word.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+            </AnimatePresence>
+          </motion.div>
         )}
+        </div>
       </div>
     </div>
   );
