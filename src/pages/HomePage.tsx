@@ -184,7 +184,7 @@ export const HomePage: FC = () => {
                     collection={collection}
                     wordCount={collectionStats[collection.id]?.wordCount || 0}
                     reviewCount={collectionStats[collection.id]?.reviewCount || 0}
-                    onClick={() => navigate(`/collection/${collection.id}`)}
+                    onClick={() => navigate('/collection')}
                   />
                 ))}
               </div>
