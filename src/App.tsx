@@ -5,7 +5,6 @@ import { AddWordPage } from './pages/AddWordPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { LoginPage } from './pages/LoginPage';
 import { CollectionPage } from './pages/CollectionPage';
-import { CollectionsPage } from './pages/CollectionsPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { signOut } from './services/auth';
@@ -58,7 +57,7 @@ const Navigation: FC = () => {
                   Dashboard
                 </Link>
                 <Link
-                  to="/collections"
+                  to="/collection"
                   className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 ${
                     isCollectionsPage
                       ? 'bg-white text-charcoal shadow-sm'
@@ -144,14 +143,6 @@ const App: FC = () => {
               element={
                 <ProtectedRoute>
                   <HomePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/collections"
-              element={
-                <ProtectedRoute>
-                  <CollectionsPage />
                 </ProtectedRoute>
               }
             />
