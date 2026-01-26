@@ -62,6 +62,21 @@ export const cloudStorageService = {
     }
   },
 
+  // Update a word
+  async updateWord(userId: string, word: VocabularyWord): Promise<void> {
+    try {
+      const wordRef = doc(db, 'users', userId, 'words', word.id);
+      await setDoc(wordRef, {
+        ...word,
+        createdAt: dateToTimestamp(word.createdAt),
+        updatedAt: dateToTimestamp(new Date()),
+      });
+    } catch (error) {
+      console.error('Error updating word:', error);
+      throw error;
+    }
+  },
+
   // Delete a word
   async deleteWord(userId: string, wordId: string): Promise<void> {
     try {

@@ -20,6 +20,8 @@ export const CollectionPage: FC = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
+  const [draggedWord, setDraggedWord] = useState<VocabularyWord | null>(null);
+  const [dropTargetCollection, setDropTargetCollection] = useState<string | null>(null);
 
   // Auto-show sidebar on first load
   useEffect(() => {
@@ -95,6 +97,67 @@ export const CollectionPage: FC = () => {
 
   const handleSpeak = (word: VocabularyWord) => {
     speakText(word.word, word.inputLanguage);
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (word: VocabularyWord) => {
+    setDraggedWord(word);
+    setIsSidebarHovered(true); // Show sidebar when dragging starts
+  };
+
+  const handleDragEnd = () => {
+    setDraggedWord(null);
+    setDropTargetCollection(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, collectionId: string | null) => {
+    e.preventDefault();
+    setDropTargetCollection(collectionId);
+  };
+
+  const handleDragLeave = () => {
+    setDropTargetCollection(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetCollectionId: string | null) => {
+    e.preventDefault();
+
+    if (!draggedWord || !user) return;
+
+    // Don't do anything if dropping on the same collection
+    if (draggedWord.collectionId === targetCollectionId) {
+      setDraggedWord(null);
+      setDropTargetCollection(null);
+      return;
+    }
+
+    try {
+      // Update word's collection
+      const updatedWord = {
+        ...draggedWord,
+        collectionId: targetCollectionId || undefined,
+        updatedAt: new Date(),
+      };
+
+      await cloudStorageService.updateWord(user.uid, updatedWord);
+
+      // Update local state
+      setWords(words.map(w => w.id === updatedWord.id ? updatedWord : w));
+
+      // Show success feedback
+      const collectionName = targetCollectionId
+        ? allCollections.find(c => c.id === targetCollectionId)?.name || 'Collection'
+        : 'No Collection';
+
+      // Simple toast notification (you can enhance this later)
+      console.log(`Moved "${draggedWord.word}" to ${collectionName}`);
+    } catch (error) {
+      console.error('Error moving word:', error);
+      alert('Failed to move word. Please try again.');
+    } finally {
+      setDraggedWord(null);
+      setDropTargetCollection(null);
+    }
   };
 
   // Filter words
@@ -173,14 +236,22 @@ export const CollectionPage: FC = () => {
             </h3>
 
             {/* All Words Option */}
-            <button
-              onClick={() => handleCollectionClick('all')}
-              className={`w-full text-left px-4 py-3 rounded-xl mb-2 transition-all duration-200 ${
-                !collectionId
-                  ? 'bg-brand-500/90 text-white shadow-lg backdrop-blur-sm'
-                  : 'hover:bg-white/40 text-gray-700'
-              }`}
+            <div
+              onDragOver={(e) => handleDragOver(e, null)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, null)}
+              className="mb-2"
             >
+              <button
+                onClick={() => handleCollectionClick('all')}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${
+                  dropTargetCollection === null && draggedWord
+                    ? 'bg-green-500/90 text-white shadow-lg ring-2 ring-green-400'
+                    : !collectionId
+                    ? 'bg-brand-500/90 text-white shadow-lg backdrop-blur-sm'
+                    : 'hover:bg-white/40 text-gray-700'
+                }`}
+              >
               <div className="flex items-center gap-3">
                 <span className="text-2xl">📝</span>
                 <div className="flex-1">
@@ -192,19 +263,27 @@ export const CollectionPage: FC = () => {
                 {!collectionId && <ChevronRight className="w-5 h-5" />}
               </div>
             </button>
+            </div>
 
             {/* Collections List */}
             <div className="space-y-2">
               {allCollections.map((col) => (
-                <button
+                <div
                   key={col.id}
-                  onClick={() => handleCollectionClick(col.id)}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${
-                    collectionId === col.id
-                      ? 'bg-brand-500/90 text-white shadow-lg backdrop-blur-sm'
-                      : 'hover:bg-white/40 text-gray-700'
-                  }`}
+                  onDragOver={(e) => handleDragOver(e, col.id)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, col.id)}
                 >
+                  <button
+                    onClick={() => handleCollectionClick(col.id)}
+                    className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${
+                      dropTargetCollection === col.id && draggedWord
+                        ? 'bg-green-500/90 text-white shadow-lg ring-2 ring-green-400'
+                        : collectionId === col.id
+                        ? 'bg-brand-500/90 text-white shadow-lg backdrop-blur-sm'
+                        : 'hover:bg-white/40 text-gray-700'
+                    }`}
+                  >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{col.emoji}</span>
                     <div className="flex-1 min-w-0">
@@ -213,6 +292,7 @@ export const CollectionPage: FC = () => {
                     {collectionId === col.id && <ChevronRight className="w-5 h-5" />}
                   </div>
                 </button>
+                </div>
               ))}
             </div>
           </div>
@@ -301,7 +381,12 @@ export const CollectionPage: FC = () => {
                     delay: index * 0.05,
                     ease: [0.22, 1, 0.36, 1]
                   }}
-                  className="bg-white rounded-2xl border border-black/5 p-5 hover:border-brand-200 transition-all duration-200 group"
+                  draggable
+                  onDragStart={() => handleDragStart(word)}
+                  onDragEnd={handleDragEnd}
+                  className={`bg-white rounded-2xl border border-black/5 p-5 hover:border-brand-200 transition-all duration-200 group cursor-grab active:cursor-grabbing ${
+                    draggedWord?.id === word.id ? 'opacity-50 scale-95' : ''
+                  }`}
                 >
                 {/* Word & Translation */}
                 <div className="mb-4">
