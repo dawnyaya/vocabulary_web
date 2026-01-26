@@ -1,5 +1,5 @@
-import { FC, useState } from 'react';
-import { VocabularyWord } from '../types';
+import { FC, useState, useEffect } from 'react';
+import { VocabularyWord, Collection } from '../types';
 import { cloudStorageService } from '../services/cloudStorage';
 import { useAuth } from '../contexts/AuthContext';
 import { AddWord } from '../components/AddWord';
@@ -7,6 +7,22 @@ import { AddWord } from '../components/AddWord';
 export const AddWordPage: FC = () => {
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
+  const [collections, setCollections] = useState<Collection[]>([]);
+
+  useEffect(() => {
+    const loadCollections = async () => {
+      if (!user) return;
+
+      try {
+        const allCollections = await cloudStorageService.getCollections(user.uid);
+        setCollections(allCollections);
+      } catch (error) {
+        console.error('Error loading collections:', error);
+      }
+    };
+
+    loadCollections();
+  }, [user]);
 
   const handleSave = async (word: VocabularyWord) => {
     if (!user) {
@@ -29,7 +45,7 @@ export const AddWordPage: FC = () => {
   return (
     <div className="min-h-screen bg-off-white py-12 px-6">
       <div className="max-w-3xl mx-auto">
-        <AddWord onSave={handleSave} />
+        <AddWord onSave={handleSave} collections={collections} />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { AddWordPage } from './pages/AddWordPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { LoginPage } from './pages/LoginPage';
 import { CollectionPage } from './pages/CollectionPage';
+import { CollectionsPage } from './pages/CollectionsPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { signOut } from './services/auth';
@@ -28,8 +29,8 @@ const Navigation: FC = () => {
   };
 
   const isHomePage = location.pathname === '/';
-  const isCollectionPage = location.pathname === '/collection';
-  const showPageToggle = isHomePage || isCollectionPage;
+  const isCollectionsPage = location.pathname.startsWith('/collection');
+  const showPageToggle = isHomePage || isCollectionsPage;
 
   return (
     <nav className="bg-white/60 backdrop-blur-md border-b border-black/5 sticky top-0 z-50">
@@ -57,14 +58,14 @@ const Navigation: FC = () => {
                   Dashboard
                 </Link>
                 <Link
-                  to="/collection"
+                  to="/collections"
                   className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                    isCollectionPage
+                    isCollectionsPage
                       ? 'bg-white text-charcoal shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Collection
+                  Collections
                 </Link>
               </div>
             )}
@@ -143,6 +144,22 @@ const App: FC = () => {
               element={
                 <ProtectedRoute>
                   <HomePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/collections"
+              element={
+                <ProtectedRoute>
+                  <CollectionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/collection/:collectionId"
+              element={
+                <ProtectedRoute>
+                  <CollectionPage />
                 </ProtectedRoute>
               }
             />

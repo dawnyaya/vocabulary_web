@@ -1,43 +1,94 @@
 import { FC, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cloudStorageService } from '../services/cloudStorage';
 import { getDueWords } from '../services/spacedRepetition';
 import { useAuth } from '../contexts/AuthContext';
+import { Collection } from '../types';
+import { CollectionCard } from '../components/CollectionCard';
+import { CreateCollectionModal } from '../components/CreateCollectionModal';
+import { Plus } from 'lucide-react';
 
 export const HomePage: FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [totalWords, setTotalWords] = useState(0);
   const [dueCount, setDueCount] = useState(0);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [collectionStats, setCollectionStats] = useState<{ [key: string]: { wordCount: number; reviewCount: number } }>({});
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user) return;
+  const loadData = async () => {
+    if (!user) return;
 
-      try {
-        const [words, allProgress] = await Promise.all([
-          cloudStorageService.getWords(user.uid),
-          cloudStorageService.getProgress(user.uid),
-        ]);
+    try {
+      const [words, allProgress, allCollections] = await Promise.all([
+        cloudStorageService.getWords(user.uid),
+        cloudStorageService.getProgress(user.uid),
+        cloudStorageService.getCollections(user.uid),
+      ]);
 
-        const due = getDueWords(allProgress);
+      const due = getDueWords(allProgress);
 
-        // Count new words (no progress yet)
-        const newWords = words.filter(
+      // Count new words (no progress yet)
+      const newWords = words.filter(
+        (word) => !allProgress.find((p) => p.wordId === word.id)
+      );
+
+      setTotalWords(words.length);
+      setDueCount(due.length + newWords.length);
+      setCollections(allCollections);
+
+      // Calculate stats for each collection
+      const stats: { [key: string]: { wordCount: number; reviewCount: number } } = {};
+      allCollections.forEach((collection) => {
+        const collectionWords = words.filter((w) => w.collectionId === collection.id);
+        const collectionProgress = allProgress.filter((p) =>
+          collectionWords.some((w) => w.id === p.wordId)
+        );
+        const collectionDue = getDueWords(collectionProgress);
+        const collectionNew = collectionWords.filter(
           (word) => !allProgress.find((p) => p.wordId === word.id)
         );
 
-        setTotalWords(words.length);
-        setDueCount(due.length + newWords.length);
-      } catch (error) {
-        console.error('Error loading data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+        stats[collection.id] = {
+          wordCount: collectionWords.length,
+          reviewCount: collectionDue.length + collectionNew.length,
+        };
+      });
 
+      setCollectionStats(stats);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, [user]);
+
+  const handleCreateCollection = async (name: string, emoji: string, gradient: string) => {
+    if (!user) return;
+
+    const newCollection: Collection = {
+      id: Date.now().toString(),
+      name,
+      emoji,
+      gradient,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    try {
+      await cloudStorageService.addCollection(user.uid, newCollection);
+      await loadData(); // Reload data
+    } catch (error) {
+      console.error('Error creating collection:', error);
+      alert('Failed to create collection');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-off-white p-6 md:p-12">
@@ -100,34 +151,54 @@ export const HomePage: FC = () => {
             </div>
           </Link>
 
-          {/* Features - Compact horizontal cards */}
-          <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-black/5 p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-2 h-2 rounded-full bg-brand-500" />
-                <h4 className="font-semibold text-charcoal">Text-to-Speech</h4>
-              </div>
-              <p className="text-gray-500 text-sm pl-5">Perfect pronunciation with native audio</p>
+          {/* Collections Section */}
+          <div className="md:col-span-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-charcoal">Collections</h3>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all duration-200 text-sm font-semibold"
+              >
+                <Plus className="w-4 h-4" />
+                New Collection
+              </button>
             </div>
 
-            <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-black/5 p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-2 h-2 rounded-full bg-brand-500" />
-                <h4 className="font-semibold text-charcoal">Auto Translation</h4>
+            {collections.length === 0 ? (
+              <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-black/5 p-12 text-center">
+                <div className="text-5xl mb-4">📚</div>
+                <h4 className="text-lg font-semibold text-charcoal mb-2">No Collections Yet</h4>
+                <p className="text-gray-500 text-sm mb-6">Create your first collection to organize your vocabulary</p>
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all duration-200 font-semibold"
+                >
+                  Create Collection
+                </button>
               </div>
-              <p className="text-gray-500 text-sm pl-5">Instant translation across languages</p>
-            </div>
-
-            <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-black/5 p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-2 h-2 rounded-full bg-brand-500" />
-                <h4 className="font-semibold text-charcoal">Spaced Repetition</h4>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {collections.slice(0, 6).map((collection) => (
+                  <CollectionCard
+                    key={collection.id}
+                    collection={collection}
+                    wordCount={collectionStats[collection.id]?.wordCount || 0}
+                    reviewCount={collectionStats[collection.id]?.reviewCount || 0}
+                    onClick={() => navigate(`/collection/${collection.id}`)}
+                  />
+                ))}
               </div>
-              <p className="text-gray-500 text-sm pl-5">Smart scheduling for optimal retention</p>
-            </div>
+            )}
           </div>
 
         </div>
+
+        {/* Create Collection Modal */}
+        <CreateCollectionModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreate={handleCreateCollection}
+        />
       </div>
     </div>
   );

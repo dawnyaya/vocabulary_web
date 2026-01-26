@@ -10,7 +10,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { VocabularyWord, WordProgress } from '../types';
+import { VocabularyWord, WordProgress, Collection } from '../types';
 
 // Convert Firestore Timestamp to Date
 const timestampToDate = (timestamp: any): Date => {
@@ -105,6 +105,92 @@ export const cloudStorageService = {
     } catch (error) {
       console.error('Error updating progress:', error);
       throw error;
+    }
+  },
+
+  // ============ COLLECTIONS ============
+
+  // Get all collections for a user
+  async getCollections(userId: string): Promise<Collection[]> {
+    try {
+      const collectionsRef = collection(db, 'users', userId, 'collections');
+      const snapshot = await getDocs(collectionsRef);
+
+      return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+          createdAt: timestampToDate(data.createdAt),
+          updatedAt: timestampToDate(data.updatedAt),
+        } as Collection;
+      });
+    } catch (error) {
+      console.error('Error getting collections:', error);
+      return [];
+    }
+  },
+
+  // Add a new collection
+  async addCollection(userId: string, collection: Collection): Promise<void> {
+    try {
+      const collectionRef = doc(db, 'users', userId, 'collections', collection.id);
+      await setDoc(collectionRef, {
+        ...collection,
+        createdAt: dateToTimestamp(collection.createdAt),
+        updatedAt: dateToTimestamp(collection.updatedAt),
+      });
+    } catch (error) {
+      console.error('Error adding collection:', error);
+      throw error;
+    }
+  },
+
+  // Update a collection
+  async updateCollection(userId: string, collection: Collection): Promise<void> {
+    try {
+      const collectionRef = doc(db, 'users', userId, 'collections', collection.id);
+      await setDoc(collectionRef, {
+        ...collection,
+        createdAt: dateToTimestamp(collection.createdAt),
+        updatedAt: dateToTimestamp(collection.updatedAt),
+      });
+    } catch (error) {
+      console.error('Error updating collection:', error);
+      throw error;
+    }
+  },
+
+  // Delete a collection
+  async deleteCollection(userId: string, collectionId: string): Promise<void> {
+    try {
+      const collectionRef = doc(db, 'users', userId, 'collections', collectionId);
+      await deleteDoc(collectionRef);
+    } catch (error) {
+      console.error('Error deleting collection:', error);
+      throw error;
+    }
+  },
+
+  // Get words for a specific collection
+  async getWordsByCollection(userId: string, collectionId: string): Promise<VocabularyWord[]> {
+    try {
+      const wordsRef = collection(db, 'users', userId, 'words');
+      const q = query(wordsRef, where('collectionId', '==', collectionId));
+      const snapshot = await getDocs(q);
+
+      return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+          createdAt: timestampToDate(data.createdAt),
+          updatedAt: timestampToDate(data.updatedAt),
+        } as VocabularyWord;
+      });
+    } catch (error) {
+      console.error('Error getting words by collection:', error);
+      return [];
     }
   },
 };

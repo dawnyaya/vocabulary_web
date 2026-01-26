@@ -2,6 +2,15 @@ export type Language = 'chinese' | 'english' | 'japanese';
 
 export type FamiliarityLevel = 'not-familiar' | 'little-familiar' | 'very-familiar';
 
+export interface Collection {
+  id: string;
+  name: string;
+  emoji: string;
+  gradient: string; // Tailwind gradient class
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface VocabularyWord {
   id: string;
   word: string;
@@ -10,6 +19,7 @@ export interface VocabularyWord {
   outputLanguage: Language;
   memorizationTip?: string;
   exampleSentence?: string;
+  collectionId?: string; // Which collection this word belongs to
   createdAt: Date;
   updatedAt: Date;
 }

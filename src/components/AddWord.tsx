@@ -1,19 +1,21 @@
 import { FC, useState } from 'react';
-import { Language, VocabularyWord } from '../types';
+import { Language, VocabularyWord, Collection } from '../types';
 import { generateAllContent } from '../services/ai';
 import { speakText } from '../services/textToSpeech';
 
 interface AddWordProps {
   onSave: (word: VocabularyWord) => void;
+  collections?: Collection[];
 }
 
-export const AddWord: FC<AddWordProps> = ({ onSave }) => {
+export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
   const [inputLanguage, setInputLanguage] = useState<Language>('english');
   const [outputLanguage, setOutputLanguage] = useState<Language>('chinese');
   const [word, setWord] = useState('');
   const [translation, setTranslation] = useState('');
   const [memorizationTip, setMemorizationTip] = useState('');
   const [exampleSentence, setExampleSentence] = useState('');
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const languages: Language[] = ['chinese', 'english', 'japanese'];
@@ -60,6 +62,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
       outputLanguage,
       memorizationTip: memorizationTip.trim() || undefined,
       exampleSentence: exampleSentence.trim() || undefined,
+      collectionId: selectedCollectionId || undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -71,6 +74,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
     setTranslation('');
     setMemorizationTip('');
     setExampleSentence('');
+    setSelectedCollectionId('');
   };
 
   return (
@@ -113,6 +117,27 @@ export const AddWord: FC<AddWordProps> = ({ onSave }) => {
           </select>
         </div>
       </div>
+
+      {/* Collection Selector */}
+      {collections.length > 0 && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Collection (Optional)
+          </label>
+          <select
+            value={selectedCollectionId}
+            onChange={(e) => setSelectedCollectionId(e.target.value)}
+            className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200"
+          >
+            <option value="">None</option>
+            {collections.map((collection) => (
+              <option key={collection.id} value={collection.id}>
+                {collection.emoji} {collection.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Word Input */}
       <div className="mb-6">

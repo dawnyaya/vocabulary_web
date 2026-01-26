@@ -1,13 +1,17 @@
 import { FC, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { cloudStorageService } from '../services/cloudStorage';
 import { useAuth } from '../contexts/AuthContext';
-import { VocabularyWord } from '../types';
-import { Trash2, Volume2 } from 'lucide-react';
+import { VocabularyWord, Collection } from '../types';
+import { Trash2, Volume2, ArrowLeft } from 'lucide-react';
 import { speakText } from '../services/textToSpeech';
+import { Link } from 'react-router-dom';
 
 export const CollectionPage: FC = () => {
   const { user } = useAuth();
+  const { collectionId } = useParams<{ collectionId: string }>();
   const [words, setWords] = useState<VocabularyWord[]>([]);
+  const [collection, setCollection] = useState<Collection | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
@@ -15,14 +19,30 @@ export const CollectionPage: FC = () => {
 
   useEffect(() => {
     loadWords();
-  }, [user]);
+  }, [user, collectionId]);
 
   const loadWords = async () => {
     if (!user) return;
 
     setLoading(true);
     try {
-      const allWords = await cloudStorageService.getWords(user.uid);
+      let allWords: VocabularyWord[];
+
+      if (collectionId) {
+        // Load specific collection and its words
+        const [collections, collectionWords] = await Promise.all([
+          cloudStorageService.getCollections(user.uid),
+          cloudStorageService.getWordsByCollection(user.uid, collectionId),
+        ]);
+
+        const foundCollection = collections.find(c => c.id === collectionId);
+        setCollection(foundCollection || null);
+        allWords = collectionWords;
+      } else {
+        // Load all words
+        allWords = await cloudStorageService.getWords(user.uid);
+      }
+
       // Sort by most recent first
       allWords.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       setWords(allWords);
@@ -85,12 +105,37 @@ export const CollectionPage: FC = () => {
     <div className="min-h-screen bg-off-white py-8 px-6">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-charcoal mb-2 tracking-tight">Collection</h1>
-          <p className="text-gray-500">
-            {words.length} {words.length === 1 ? 'word' : 'words'} in your vocabulary
-          </p>
-        </div>
+        {collection ? (
+          <div className="mb-8">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </Link>
+            <div className={`${collection.gradient} rounded-3xl p-8 mb-6`}>
+              <div className="flex items-center gap-4">
+                <div className="text-6xl">{collection.emoji}</div>
+                <div>
+                  <h1 className="text-4xl font-bold text-gray-800 mb-1 tracking-tight">
+                    {collection.name}
+                  </h1>
+                  <p className="text-gray-600">
+                    {words.length} {words.length === 1 ? 'word' : 'words'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-charcoal mb-2 tracking-tight">Collection</h1>
+            <p className="text-gray-500">
+              {words.length} {words.length === 1 ? 'word' : 'words'} in your vocabulary
+            </p>
+          </div>
+        )}
 
         {/* Search & Filter */}
         <div className="mb-8 flex flex-col sm:flex-row gap-3">
