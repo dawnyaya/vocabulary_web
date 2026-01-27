@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Collection } from '../types';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Edit2, Trash2 } from 'lucide-react';
 import { getIconComponent } from '../utils/collectionIcons';
 
 interface CollectionCardProps {
@@ -9,6 +9,9 @@ interface CollectionCardProps {
   reviewCount: number;
   masteredCount: number;
   onClick?: () => void;
+  onEdit?: (e: React.MouseEvent) => void;
+  onDelete?: (e: React.MouseEvent) => void;
+  canDelete?: boolean;
 }
 
 export const CollectionCard: FC<CollectionCardProps> = ({
@@ -17,6 +20,9 @@ export const CollectionCard: FC<CollectionCardProps> = ({
   reviewCount,
   masteredCount,
   onClick,
+  onEdit,
+  onDelete,
+  canDelete = true,
 }) => {
   const progress = wordCount > 0 ? (masteredCount / wordCount) * 100 : 0;
   const IconComponent = getIconComponent(collection.emoji);
@@ -36,6 +42,30 @@ export const CollectionCard: FC<CollectionCardProps> = ({
           backgroundSize: '32px 32px'
         }}></div>
       </div>
+
+      {/* Action Buttons - Only show if handlers are provided */}
+      {(onEdit || onDelete) && (
+        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="p-2 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full shadow-lg hover:scale-110 transition-all"
+              title="Edit collection"
+            >
+              <Edit2 className="w-4 h-4 text-gray-700" />
+            </button>
+          )}
+          {onDelete && canDelete && (
+            <button
+              onClick={onDelete}
+              className="p-2 bg-white/90 backdrop-blur-sm hover:bg-red-50 rounded-full shadow-lg hover:scale-110 transition-all"
+              title="Delete collection"
+            >
+              <Trash2 className="w-4 h-4 text-red-600" />
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="relative z-10">
         {/* Icon */}

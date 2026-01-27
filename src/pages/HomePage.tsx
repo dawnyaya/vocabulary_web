@@ -6,6 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { Collection } from '../types';
 import { CollectionCard } from '../components/CollectionCard';
 import { CreateCollectionModal } from '../components/CreateCollectionModal';
+import { EditCollectionModal } from '../components/EditCollectionModal';
+import { DeleteCollectionDialog } from '../components/DeleteCollectionDialog';
 import { Plus } from 'lucide-react';
 
 export const HomePage: FC = () => {
@@ -16,6 +18,9 @@ export const HomePage: FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [collectionStats, setCollectionStats] = useState<{ [key: string]: { wordCount: number; reviewCount: number; masteredCount: number } }>({});
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [_loading, setLoading] = useState(true);
 
   const loadData = async () => {
@@ -96,6 +101,80 @@ export const HomePage: FC = () => {
     } catch (error) {
       console.error('Error creating collection:', error);
       alert('Failed to create collection');
+    }
+  };
+
+  const handleEditClick = (e: React.MouseEvent, collection: Collection) => {
+    e.stopPropagation(); // Prevent card click
+    setSelectedCollection(collection);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, collection: Collection) => {
+    e.stopPropagation(); // Prevent card click
+    setSelectedCollection(collection);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleUpdateCollection = async (id: string, name: string, icon: string, gradient: string) => {
+    if (!user) return;
+
+    const updatedCollection: Collection = {
+      id,
+      name,
+      emoji: icon,
+      gradient,
+      createdAt: selectedCollection?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+
+    try {
+      await cloudStorageService.updateCollection(user.uid, updatedCollection);
+      await loadData(); // Reload data
+      setIsEditModalOpen(false);
+      setSelectedCollection(null);
+    } catch (error) {
+      console.error('Error updating collection:', error);
+      alert('Failed to update collection');
+    }
+  };
+
+  const handleDeleteCollection = async () => {
+    if (!user || !selectedCollection) return;
+
+    try {
+      // Get all words in this collection
+      const allWords = await cloudStorageService.getWords(user.uid);
+      const wordsInCollection = allWords.filter((w) => w.collectionId === selectedCollection.id);
+
+      // If there are words, move them to General collection
+      if (wordsInCollection.length > 0) {
+        // Get or create General collection
+        const generalCollection = await cloudStorageService.ensureDefaultCollection(user.uid);
+
+        // Move all words to General collection
+        for (const word of wordsInCollection) {
+          const updatedWord = {
+            ...word,
+            collectionId: generalCollection.id,
+            updatedAt: new Date(),
+          };
+          await cloudStorageService.updateWord(user.uid, updatedWord);
+        }
+      }
+
+      // Delete the collection
+      await cloudStorageService.deleteCollection(user.uid, selectedCollection.id);
+
+      // Reload data
+      await loadData();
+
+      // Close dialog
+      setIsDeleteDialogOpen(false);
+      setSelectedCollection(null);
+    } catch (error) {
+      console.error('Error deleting collection:', error);
+      alert('Failed to delete collection. Please try again.');
     }
   };
 
@@ -195,6 +274,9 @@ export const HomePage: FC = () => {
                     reviewCount={collectionStats[collection.id]?.reviewCount || 0}
                     masteredCount={collectionStats[collection.id]?.masteredCount || 0}
                     onClick={() => navigate('/collection')}
+                    onEdit={(e) => handleEditClick(e, collection)}
+                    onDelete={(e) => handleDeleteClick(e, collection)}
+                    canDelete={collection.id !== 'general-default'}
                   />
                 ))}
               </div>
@@ -208,6 +290,29 @@ export const HomePage: FC = () => {
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onCreate={handleCreateCollection}
+        />
+
+        {/* Edit Collection Modal */}
+        <EditCollectionModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedCollection(null);
+          }}
+          onUpdate={handleUpdateCollection}
+          collection={selectedCollection}
+        />
+
+        {/* Delete Collection Dialog */}
+        <DeleteCollectionDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setSelectedCollection(null);
+          }}
+          onConfirm={handleDeleteCollection}
+          collection={selectedCollection}
+          wordCount={selectedCollection ? (collectionStats[selectedCollection.id]?.wordCount || 0) : 0}
         />
       </div>
     </div>
