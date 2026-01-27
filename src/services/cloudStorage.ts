@@ -218,9 +218,9 @@ export const cloudStorageService = {
       let generalCollection = collections.find(c => c.name === 'General');
 
       if (!generalCollection) {
-        // Create default General collection
+        // Create default General collection with fixed ID to prevent duplicates
         generalCollection = {
-          id: 'general-' + Date.now(),
+          id: 'general-default',
           name: 'General',
           emoji: '📝',
           gradient: 'bg-gradient-to-br from-gray-100 to-slate-100',
@@ -228,7 +228,14 @@ export const cloudStorageService = {
           updatedAt: new Date(),
         };
 
-        await this.addCollection(userId, generalCollection);
+        // Use setDoc to ensure idempotency - won't create duplicates even if called multiple times
+        try {
+          await this.addCollection(userId, generalCollection);
+        } catch (err) {
+          // If it already exists, that's fine, just return it
+          const updatedCollections = await this.getCollections(userId);
+          generalCollection = updatedCollections.find(c => c.name === 'General') || generalCollection;
+        }
       }
 
       return generalCollection;
