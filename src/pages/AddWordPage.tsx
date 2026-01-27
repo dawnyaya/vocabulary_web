@@ -6,7 +6,7 @@ import { AddWord } from '../components/AddWord';
 
 export const AddWordPage: FC = () => {
   const { user } = useAuth();
-  const [isSaving, setIsSaving] = useState(false);
+  const [_isSaving, setIsSaving] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
 
   useEffect(() => {

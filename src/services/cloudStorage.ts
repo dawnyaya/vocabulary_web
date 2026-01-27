@@ -2,7 +2,6 @@ import {
   collection,
   doc,
   getDocs,
-  getDoc,
   setDoc,
   deleteDoc,
   query,
@@ -222,7 +221,7 @@ export const cloudStorageService = {
         generalCollection = {
           id: 'general-default',
           name: 'General',
-          emoji: '📝',
+          emoji: 'file-text', // Using icon name instead of emoji
           gradient: 'bg-gradient-to-br from-gray-100 to-slate-100',
           createdAt: new Date(),
           updatedAt: new Date(),

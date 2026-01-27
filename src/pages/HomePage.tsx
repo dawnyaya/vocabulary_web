@@ -16,7 +16,7 @@ export const HomePage: FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [collectionStats, setCollectionStats] = useState<{ [key: string]: { wordCount: number; reviewCount: number; masteredCount: number } }>({});
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   const loadData = async () => {
     if (!user) return;

@@ -1,18 +1,12 @@
 import { FC, useState } from 'react';
 import { X } from 'lucide-react';
+import { COLLECTION_ICONS } from '../utils/collectionIcons';
 
 interface CreateCollectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (name: string, emoji: string, gradient: string) => void;
 }
-
-// Predefined emojis for collections
-const EMOJIS = [
-  '📚', '✨', '🎯', '🚀', '💡', '🎨', '🌟', '🔥',
-  '💼', '🎓', '🌈', '⚡', '🎭', '🎪', '🎬', '🎵',
-  '🏆', '🎮', '🧩', '🎲', '🧠', '💎', '🌸', '🍀',
-];
 
 // Predefined gradient backgrounds (Tailwind classes)
 const GRADIENTS = [
@@ -34,16 +28,16 @@ export const CreateCollectionModal: FC<CreateCollectionModalProps> = ({
   onCreate,
 }) => {
   const [name, setName] = useState('');
-  const [selectedEmoji, setSelectedEmoji] = useState('📚');
+  const [selectedIcon, setSelectedIcon] = useState(COLLECTION_ICONS[0].name);
   const [selectedGradient, setSelectedGradient] = useState(GRADIENTS[0].class);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      onCreate(name.trim(), selectedEmoji, selectedGradient);
+      onCreate(name.trim(), selectedIcon, selectedGradient);
       // Reset form
       setName('');
-      setSelectedEmoji('📚');
+      setSelectedIcon(COLLECTION_ICONS[0].name);
       setSelectedGradient(GRADIENTS[0].class);
       onClose();
     }
@@ -81,26 +75,30 @@ export const CreateCollectionModal: FC<CreateCollectionModalProps> = ({
             />
           </div>
 
-          {/* Emoji Selector */}
+          {/* Icon Selector */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-3">
               Choose Icon
             </label>
-            <div className="grid grid-cols-8 gap-2">
-              {EMOJIS.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => setSelectedEmoji(emoji)}
-                  className={`text-2xl p-2 rounded-xl hover:bg-gray-100 transition-all ${
-                    selectedEmoji === emoji
-                      ? 'bg-brand-100 ring-2 ring-brand-500 scale-110'
-                      : ''
-                  }`}
-                >
-                  {emoji}
-                </button>
-              ))}
+            <div className="grid grid-cols-6 gap-2 max-h-64 overflow-y-auto pr-1">
+              {COLLECTION_ICONS.map((icon) => {
+                const IconComponent = icon.component;
+                return (
+                  <button
+                    key={icon.name}
+                    type="button"
+                    onClick={() => setSelectedIcon(icon.name)}
+                    className={`p-3 rounded-xl hover:bg-gray-100 transition-all ${
+                      selectedIcon === icon.name
+                        ? 'bg-brand-100 ring-2 ring-brand-500 scale-105'
+                        : 'bg-gray-50'
+                    }`}
+                    title={icon.label}
+                  >
+                    <IconComponent className="w-6 h-6 text-gray-700 mx-auto" strokeWidth={1.5} />
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -131,10 +129,20 @@ export const CreateCollectionModal: FC<CreateCollectionModalProps> = ({
             <label className="block text-sm font-semibold text-gray-700 mb-3">
               Preview
             </label>
-            <div className={`${selectedGradient} rounded-2xl p-6 text-center`}>
-              <div className="text-4xl mb-2">{selectedEmoji}</div>
-              <div className="text-lg font-bold text-gray-800">
-                {name || 'Collection Name'}
+            <div className={`${selectedGradient} rounded-2xl p-6 text-center relative overflow-hidden`}>
+              {/* Soft gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-black/5"></div>
+
+              <div className="relative z-10">
+                <div className="flex justify-center mb-3">
+                  {(() => {
+                    const IconComponent = COLLECTION_ICONS.find(i => i.name === selectedIcon)?.component;
+                    return IconComponent ? <IconComponent className="w-12 h-12 text-gray-700/80" strokeWidth={1.5} /> : null;
+                  })()}
+                </div>
+                <div className="text-lg font-bold text-gray-800">
+                  {name || 'Collection Name'}
+                </div>
               </div>
             </div>
           </div>

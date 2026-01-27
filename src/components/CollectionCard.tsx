@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { Collection } from '../types';
 import { ChevronRight } from 'lucide-react';
+import { getIconComponent } from '../utils/collectionIcons';
 
 interface CollectionCardProps {
   collection: Collection;
@@ -18,14 +19,18 @@ export const CollectionCard: FC<CollectionCardProps> = ({
   onClick,
 }) => {
   const progress = wordCount > 0 ? (masteredCount / wordCount) * 100 : 0;
+  const IconComponent = getIconComponent(collection.emoji);
 
   return (
     <div
       onClick={onClick}
       className={`${collection.gradient} rounded-3xl p-6 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl group relative overflow-hidden`}
     >
+      {/* Soft gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-black/5"></div>
+
       {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-10">
+      <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
           backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
           backgroundSize: '32px 32px'
@@ -33,9 +38,9 @@ export const CollectionCard: FC<CollectionCardProps> = ({
       </div>
 
       <div className="relative z-10">
-        {/* Emoji Icon */}
-        <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
-          {collection.emoji}
+        {/* Icon */}
+        <div className="mb-4 group-hover:scale-110 transition-transform duration-300">
+          <IconComponent className="w-12 h-12 text-gray-700/80" strokeWidth={1.5} />
         </div>
 
         {/* Collection Name */}
@@ -45,13 +50,13 @@ export const CollectionCard: FC<CollectionCardProps> = ({
 
         {/* Progress Bar */}
         <div className="mb-3">
-          <div className="flex items-center justify-between text-xs text-gray-600 mb-1.5">
-            <span className="font-medium">{masteredCount} / {wordCount} mastered</span>
-            <span className="font-semibold">{Math.round(progress)}%</span>
+          <div className="flex items-center justify-between text-xs text-gray-700 mb-2">
+            <span className="font-semibold">{masteredCount} / {wordCount} mastered</span>
+            <span className="font-bold">{Math.round(progress)}%</span>
           </div>
-          <div className="h-1.5 bg-white/40 rounded-full overflow-hidden">
+          <div className="h-3 bg-black/15 backdrop-blur-sm rounded-full overflow-hidden shadow-inner">
             <div
-              className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500 ease-out"
+              className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500 ease-out shadow-sm"
               style={{ width: `${progress}%` }}
             />
           </div>

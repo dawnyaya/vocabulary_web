@@ -256,7 +256,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
             )}
             {collections.map((collection) => (
               <option key={collection.id} value={collection.id}>
-                {collection.emoji} {collection.name}
+                {collection.name}
               </option>
             ))}
           </select>

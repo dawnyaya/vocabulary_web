@@ -6,6 +6,7 @@ import { VocabularyWord, Collection } from '../types';
 import { Trash2, Volume2, ChevronRight } from 'lucide-react';
 import { speakText } from '../services/textToSpeech';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getIconComponent } from '../utils/collectionIcons';
 
 export const CollectionPage: FC = () => {
   const { user } = useAuth();
@@ -276,7 +277,10 @@ export const CollectionPage: FC = () => {
                     }`}
                   >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{col.emoji}</span>
+                    {(() => {
+                      const IconComponent = getIconComponent(col.emoji);
+                      return <IconComponent className="w-5 h-5 flex-shrink-0" strokeWidth={1.5} />;
+                    })()}
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold truncate">{col.name}</div>
                     </div>
