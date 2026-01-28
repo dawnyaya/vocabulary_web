@@ -205,7 +205,7 @@ export const EditWordModal: FC<EditWordModalProps> = ({
           {/* Memorization Tip */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Memorization Tip
+              Memorization Tip <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <textarea
               value={memorizationTip}
@@ -219,7 +219,7 @@ export const EditWordModal: FC<EditWordModalProps> = ({
           {/* Example Sentence */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Example Sentence
+              Example Sentence <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <textarea
               value={exampleSentence}

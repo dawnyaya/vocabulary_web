@@ -213,7 +213,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
       {/* Optional: Memorization Tip */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Memorization Tip
+          Memorization Tip <span className="text-gray-400 font-normal">(optional)</span>
         </label>
         <textarea
           value={memorizationTip}
@@ -227,7 +227,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
       {/* Optional: Example Sentence */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Example Sentence
+          Example Sentence <span className="text-gray-400 font-normal">(optional)</span>
         </label>
         <textarea
           value={exampleSentence}
