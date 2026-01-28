@@ -244,8 +244,7 @@ export const CollectionPage: FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-off-white via-blue-50/30 to-purple-50/20">
       {/* Sidebar */}
       <div
-        className="fixed left-0 top-0 h-full z-40"
-        style={{ width: isSidebarHovered ? '256px' : '16px' }}
+        className="fixed left-0 top-0 h-full w-64 z-40"
         onMouseEnter={() => setIsSidebarHovered(true)}
         onMouseLeave={() => setIsSidebarHovered(false)}
       >
@@ -254,7 +253,7 @@ export const CollectionPage: FC = () => {
           initial={{ x: '-80%' }}
           animate={{ x: isSidebarHovered ? 0 : '-80%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="h-full w-64 bg-white/50 backdrop-blur-xl border-r border-white/20 shadow-2xl shadow-black/5 relative"
+          className="h-full w-full bg-white/50 backdrop-blur-xl border-r border-white/20 shadow-2xl shadow-black/5 relative"
           style={{
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
