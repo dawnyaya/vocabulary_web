@@ -111,9 +111,16 @@ export const CollectionPage: FC = () => {
 
     try {
       await cloudStorageService.updateWord(user.uid, updatedWord);
-      setWords(words.map(w => w.id === updatedWord.id ? updatedWord : w));
       setIsEditModalOpen(false);
       setEditingWord(null);
+
+      // Navigate to the new collection if changed
+      if (updatedWord.collectionId && updatedWord.collectionId !== collectionId) {
+        navigate(`/collection/${updatedWord.collectionId}`);
+      } else {
+        // If collection unchanged, just update the word in the list
+        setWords(words.map(w => w.id === updatedWord.id ? updatedWord : w));
+      }
     } catch (error) {
       console.error('Error updating word:', error);
       alert('Failed to update word. Please try again.');
@@ -125,8 +132,15 @@ export const CollectionPage: FC = () => {
 
     try {
       await cloudStorageService.addWord(user.uid, newWord);
-      setWords([newWord, ...words]);
       setIsAddWordModalOpen(false);
+
+      // Navigate to the collection where the word was saved
+      if (newWord.collectionId && newWord.collectionId !== collectionId) {
+        navigate(`/collection/${newWord.collectionId}`);
+      } else {
+        // If saved to current collection or no collection specified, just reload
+        setWords([newWord, ...words]);
+      }
     } catch (error) {
       console.error('Error adding word:', error);
       alert('Failed to add word. Please try again.');
