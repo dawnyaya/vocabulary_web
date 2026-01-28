@@ -14,16 +14,16 @@ export default {
         charcoal: '#121212',
         'off-white': '#F8FAFC',
         brand: {
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          200: '#C7D2FE',
-          300: '#A5B4FC',
-          400: '#818CF8',
-          500: '#6366F1', // Primary brand color - soft indigo
-          600: '#4F46E5',
-          700: '#4338CA',
-          800: '#3730A3',
-          900: '#312E81',
+          50: '#ECFDF5',   // emerald-50
+          100: '#D1FAE5',  // emerald-100
+          200: '#A7F3D0',  // emerald-200
+          300: '#6EE7B7',  // emerald-300
+          400: '#34D399',  // emerald-400
+          500: '#10B981',  // 辅助色 - emerald-500
+          600: '#059669',  // 主色 - emerald-600
+          700: '#047857',  // emerald-700
+          800: '#065F46',  // emerald-800
+          900: '#064E3B',  // emerald-900
         },
       },
       backdropBlur: {
