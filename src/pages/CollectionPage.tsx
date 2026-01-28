@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { cloudStorageService } from '../services/cloudStorage';
 import { useAuth } from '../contexts/AuthContext';
 import { VocabularyWord, Collection } from '../types';
-import { Trash2, Volume2, ChevronRight } from 'lucide-react';
+import { Trash2, Volume2, ChevronRight, Edit2 } from 'lucide-react';
 import { speakText } from '../services/textToSpeech';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getIconComponent } from '../utils/collectionIcons';
+import { EditWordModal } from '../components/EditWordModal';
 
 export const CollectionPage: FC = () => {
   const { user } = useAuth();
@@ -23,6 +24,8 @@ export const CollectionPage: FC = () => {
   const [animationKey, setAnimationKey] = useState(0);
   const [draggedWord, setDraggedWord] = useState<VocabularyWord | null>(null);
   const [dropTargetCollection, setDropTargetCollection] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingWord, setEditingWord] = useState<VocabularyWord | null>(null);
 
   // Auto-show sidebar on first load
   useEffect(() => {
@@ -93,6 +96,25 @@ export const CollectionPage: FC = () => {
     } catch (error) {
       console.error('Error deleting word:', error);
       alert('Failed to delete word. Please try again.');
+    }
+  };
+
+  const handleEdit = (word: VocabularyWord) => {
+    setEditingWord(word);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (updatedWord: VocabularyWord) => {
+    if (!user) return;
+
+    try {
+      await cloudStorageService.updateWord(user.uid, updatedWord);
+      setWords(words.map(w => w.id === updatedWord.id ? updatedWord : w));
+      setIsEditModalOpen(false);
+      setEditingWord(null);
+    } catch (error) {
+      console.error('Error updating word:', error);
+      alert('Failed to update word. Please try again.');
     }
   };
 
@@ -398,12 +420,22 @@ export const CollectionPage: FC = () => {
                       </div>
                       <p className="text-gray-600">{word.translation}</p>
                     </div>
-                    <button
-                      onClick={() => handleDelete(word.id)}
-                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-50 rounded-lg transition-all duration-200"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </button>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleEdit(word)}
+                        className="opacity-0 group-hover:opacity-100 p-2 hover:bg-brand-50 rounded-lg transition-all duration-200"
+                        title="Edit word"
+                      >
+                        <Edit2 className="w-4 h-4 text-brand-600" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(word.id)}
+                        className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-50 rounded-lg transition-all duration-200"
+                        title="Delete word"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Language Tags */}
@@ -460,6 +492,18 @@ export const CollectionPage: FC = () => {
         )}
         </div>
       </div>
+
+      {/* Edit Word Modal */}
+      <EditWordModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingWord(null);
+        }}
+        onSave={handleSaveEdit}
+        word={editingWord}
+        collections={allCollections}
+      />
     </div>
   );
 };
