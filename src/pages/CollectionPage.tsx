@@ -349,34 +349,24 @@ export const CollectionPage: FC = () => {
       {/* Main Content */}
       <div className="ml-0 md:ml-12 py-8 px-6">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
+          {/* Breadcrumb Title */}
           {currentCollection ? (
-            <div className="mb-8">
-              <div className={`${currentCollection.gradient} rounded-3xl p-8 mb-6`}>
-                <div className="flex items-center gap-4">
-                  <div className="mb-2">
-                    {(() => {
-                      const HeaderIconComponent = getIconComponent(currentCollection.emoji);
-                      return <HeaderIconComponent className="w-16 h-16 text-gray-700/80" strokeWidth={1.5} />;
-                    })()}
-                  </div>
-                  <div>
-                    <h1 className="text-4xl font-bold text-gray-800 mb-1 tracking-tight">
-                      {currentCollection.name}
-                    </h1>
-                    <p className="text-gray-600">
-                      {words.length} {words.length === 1 ? 'word' : 'words'}
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-charcoal">
+                {currentCollection.name}{' '}
+                <span className="text-gray-400 font-normal text-sm">
+                  ({words.length} {words.length === 1 ? 'word' : 'words'})
+                </span>
+              </h1>
             </div>
           ) : (
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-charcoal mb-2 tracking-tight">All Words</h1>
-              <p className="text-gray-500">
-                {words.length} {words.length === 1 ? 'word' : 'words'} in your vocabulary
-              </p>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-charcoal">
+                All Words{' '}
+                <span className="text-gray-400 font-normal text-sm">
+                  ({words.length} {words.length === 1 ? 'word' : 'words'})
+                </span>
+              </h1>
             </div>
           )}
 
@@ -400,8 +390,14 @@ export const CollectionPage: FC = () => {
             <option value="japanese">Japanese</option>
           </select>
           <button
+            onClick={() => navigate('/review')}
+            className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 whitespace-nowrap"
+          >
+            Start Review
+          </button>
+          <button
             onClick={() => setIsAddWordModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 whitespace-nowrap"
+            className="flex items-center gap-2 px-6 py-3 bg-transparent border-2 border-brand-500 text-brand-600 font-semibold rounded-2xl hover:bg-brand-50 transition-all duration-200 whitespace-nowrap"
           >
             <Plus className="w-5 h-5" />
             Add Word
