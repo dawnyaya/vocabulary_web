@@ -59,8 +59,10 @@ export const CollectionPage: FC = () => {
 
       if (collectionId) {
         // Load specific collection and its words
+        console.log('Loading collection with ID:', collectionId);
         const collectionWords = await cloudStorageService.getWordsByCollection(user.uid, collectionId);
         const foundCollection = collections.find(c => c.id === collectionId);
+        console.log('Found collection:', foundCollection);
         setCurrentCollection(foundCollection || null);
         allWords = collectionWords;
       } else {
@@ -352,6 +354,7 @@ export const CollectionPage: FC = () => {
           {/* Header */}
           {currentCollection ? (
             <div className="mb-8">
+              {console.log('Rendering tabs for collection:', currentCollection.name)}
               <div className={`${currentCollection.gradient} rounded-3xl p-8 mb-6`}>
                 <div className="flex items-center gap-4">
                   <div className="mb-2">
