@@ -242,18 +242,22 @@ export const CollectionPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-off-white via-blue-50/30 to-purple-50/20">
-      {/* Sidebar */}
+      {/* Sidebar Trigger Zone */}
       <div
-        className="fixed left-0 top-0 h-full w-64 z-40"
+        className="fixed left-0 top-0 h-full w-3 z-40"
         onMouseEnter={() => setIsSidebarHovered(true)}
-        onMouseLeave={() => setIsSidebarHovered(false)}
-      >
+      />
+
+      {/* Sidebar */}
+      <div className="fixed left-0 top-0 h-full z-40 pointer-events-none">
         {/* Sidebar content */}
         <motion.div
           initial={{ x: '-80%' }}
           animate={{ x: isSidebarHovered ? 0 : '-80%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="h-full w-full bg-white/50 backdrop-blur-xl border-r border-white/20 shadow-2xl shadow-black/5 relative"
+          className="h-full w-64 bg-white/50 backdrop-blur-xl border-r border-white/20 shadow-2xl shadow-black/5 relative pointer-events-auto"
+          onMouseEnter={() => setIsSidebarHovered(true)}
+          onMouseLeave={() => setIsSidebarHovered(false)}
           style={{
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
