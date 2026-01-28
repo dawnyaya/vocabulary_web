@@ -278,7 +278,7 @@ export const HomePage: FC = () => {
                     wordCount={collectionStats[collection.id]?.wordCount || 0}
                     reviewCount={collectionStats[collection.id]?.reviewCount || 0}
                     masteredCount={collectionStats[collection.id]?.masteredCount || 0}
-                    onClick={() => navigate('/collection')}
+                    onClick={() => navigate(`/collection/${collection.id}`)}
                     onEdit={(e) => handleEditClick(e, collection)}
                     onDelete={(e) => handleDeleteClick(e, collection)}
                     canDelete={collection.id !== 'general-default'}
