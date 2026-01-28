@@ -339,7 +339,12 @@ export const CollectionPage: FC = () => {
             <div className="mb-8">
               <div className={`${currentCollection.gradient} rounded-3xl p-8 mb-6`}>
                 <div className="flex items-center gap-4">
-                  <div className="text-6xl">{currentCollection.emoji}</div>
+                  <div className="mb-2">
+                    {(() => {
+                      const HeaderIconComponent = getIconComponent(currentCollection.emoji);
+                      return <HeaderIconComponent className="w-16 h-16 text-gray-700/80" strokeWidth={1.5} />;
+                    })()}
+                  </div>
                   <div>
                     <h1 className="text-4xl font-bold text-gray-800 mb-1 tracking-tight">
                       {currentCollection.name}
