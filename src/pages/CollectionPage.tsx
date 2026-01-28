@@ -265,7 +265,7 @@ export const CollectionPage: FC = () => {
         >
           {/* Visible edge hint when collapsed */}
           {!isSidebarHovered && (
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full">
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full pointer-events-none">
               <div
                 className="bg-brand-500/80 text-white px-2 py-4 rounded-r-lg text-xs font-semibold shadow-lg flex items-center gap-1"
                 style={{
