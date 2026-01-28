@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { cloudStorageService } from '../services/cloudStorage';
 import { useAuth } from '../contexts/AuthContext';
 import { VocabularyWord, Collection } from '../types';
-import { Trash2, Volume2, ChevronRight, Edit2 } from 'lucide-react';
+import { Trash2, Volume2, ChevronRight, Edit2, Plus } from 'lucide-react';
 import { speakText } from '../services/textToSpeech';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getIconComponent } from '../utils/collectionIcons';
 import { EditWordModal } from '../components/EditWordModal';
+import { AddWordModal } from '../components/AddWordModal';
 
 export const CollectionPage: FC = () => {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ export const CollectionPage: FC = () => {
   const [dropTargetCollection, setDropTargetCollection] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingWord, setEditingWord] = useState<VocabularyWord | null>(null);
+  const [isAddWordModalOpen, setIsAddWordModalOpen] = useState(false);
 
   // Auto-show sidebar on first load
   useEffect(() => {
@@ -115,6 +117,19 @@ export const CollectionPage: FC = () => {
     } catch (error) {
       console.error('Error updating word:', error);
       alert('Failed to update word. Please try again.');
+    }
+  };
+
+  const handleAddWord = async (newWord: VocabularyWord) => {
+    if (!user) return;
+
+    try {
+      await cloudStorageService.addWord(user.uid, newWord);
+      setWords([newWord, ...words]);
+      setIsAddWordModalOpen(false);
+    } catch (error) {
+      console.error('Error adding word:', error);
+      alert('Failed to add word. Please try again.');
     }
   };
 
@@ -364,6 +379,13 @@ export const CollectionPage: FC = () => {
             <option value="chinese">Chinese</option>
             <option value="japanese">Japanese</option>
           </select>
+          <button
+            onClick={() => setIsAddWordModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5" />
+            Add Word
+          </button>
         </div>
 
         {/* Words Grid with Animation */}
@@ -502,6 +524,14 @@ export const CollectionPage: FC = () => {
         }}
         onSave={handleSaveEdit}
         word={editingWord}
+        collections={allCollections}
+      />
+
+      {/* Add Word Modal */}
+      <AddWordModal
+        isOpen={isAddWordModalOpen}
+        onClose={() => setIsAddWordModalOpen(false)}
+        onSave={handleAddWord}
         collections={allCollections}
       />
     </div>
