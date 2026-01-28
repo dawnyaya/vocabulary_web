@@ -22,6 +22,7 @@ export const HomePage: FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [_loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'collections' | 'review'>('collections');
 
   const loadData = async () => {
     if (!user) return;
@@ -247,43 +248,93 @@ export const HomePage: FC = () => {
           {/* Collections Section */}
           <div className="md:col-span-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-charcoal">Collections</h3>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all duration-200 text-sm font-semibold"
-              >
-                <Plus className="w-4 h-4" />
-                New Collection
-              </button>
-            </div>
-
-            {collections.length === 0 ? (
-              <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-black/5 p-12 text-center">
-                <div className="text-5xl mb-4">📚</div>
-                <h4 className="text-lg font-semibold text-charcoal mb-2">No Collections Yet</h4>
-                <p className="text-gray-500 text-sm mb-6">Create your first collection to organize your vocabulary</p>
+              {/* Tabs */}
+              <div className="flex gap-2">
                 <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all duration-200 font-semibold"
+                  onClick={() => setActiveTab('collections')}
+                  className={`px-6 py-2.5 rounded-xl font-bold text-lg transition-all duration-200 ${
+                    activeTab === 'collections'
+                      ? 'text-charcoal'
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
                 >
-                  Create Collection
+                  Collections
+                </button>
+                <button
+                  onClick={() => setActiveTab('review')}
+                  className={`px-6 py-2.5 rounded-xl font-bold text-lg transition-all duration-200 ${
+                    activeTab === 'review'
+                      ? 'text-charcoal'
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  Review
                 </button>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {collections.slice(0, 6).map((collection) => (
-                  <CollectionCard
-                    key={collection.id}
-                    collection={collection}
-                    wordCount={collectionStats[collection.id]?.wordCount || 0}
-                    reviewCount={collectionStats[collection.id]?.reviewCount || 0}
-                    masteredCount={collectionStats[collection.id]?.masteredCount || 0}
-                    onClick={() => navigate(`/collection/${collection.id}`)}
-                    onEdit={(e) => handleEditClick(e, collection)}
-                    onDelete={(e) => handleDeleteClick(e, collection)}
-                    canDelete={collection.id !== 'general-default'}
-                  />
-                ))}
+              {activeTab === 'collections' && (
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all duration-200 text-sm font-semibold"
+                >
+                  <Plus className="w-4 h-4" />
+                  New Collection
+                </button>
+              )}
+            </div>
+
+            {/* Collections Tab Content */}
+            {activeTab === 'collections' && (
+              <>
+                {collections.length === 0 ? (
+                  <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-black/5 p-12 text-center">
+                    <div className="text-5xl mb-4">📚</div>
+                    <h4 className="text-lg font-semibold text-charcoal mb-2">No Collections Yet</h4>
+                    <p className="text-gray-500 text-sm mb-6">Create your first collection to organize your vocabulary</p>
+                    <button
+                      onClick={() => setIsCreateModalOpen(true)}
+                      className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all duration-200 font-semibold"
+                    >
+                      Create Collection
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {collections.slice(0, 6).map((collection) => (
+                      <CollectionCard
+                        key={collection.id}
+                        collection={collection}
+                        wordCount={collectionStats[collection.id]?.wordCount || 0}
+                        reviewCount={collectionStats[collection.id]?.reviewCount || 0}
+                        masteredCount={collectionStats[collection.id]?.masteredCount || 0}
+                        onClick={() => navigate(`/collection/${collection.id}`)}
+                        onEdit={(e) => handleEditClick(e, collection)}
+                        onDelete={(e) => handleDeleteClick(e, collection)}
+                        canDelete={collection.id !== 'general-default'}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Review Tab Content */}
+            {activeTab === 'review' && (
+              <div className="bg-white/60 backdrop-blur-sm rounded-3xl border border-black/5 p-12 text-center">
+                <div className="inline-block p-4 bg-brand-50 rounded-2xl mb-6">
+                  <svg className="w-12 h-12 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-charcoal mb-3">Review Your Vocabulary</h3>
+                <p className="text-gray-600 mb-8">
+                  Practice with flashcards and reinforce your memory through spaced repetition
+                </p>
+                <button
+                  onClick={() => navigate('/review')}
+                  className="px-8 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200"
+                >
+                  Start Review Session
+                </button>
               </div>
             )}
           </div>

@@ -28,7 +28,6 @@ export const CollectionPage: FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingWord, setEditingWord] = useState<VocabularyWord | null>(null);
   const [isAddWordModalOpen, setIsAddWordModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'collection' | 'review'>('collection');
 
   // Auto-show sidebar on first load
   useEffect(() => {
@@ -59,10 +58,8 @@ export const CollectionPage: FC = () => {
 
       if (collectionId) {
         // Load specific collection and its words
-        console.log('Loading collection with ID:', collectionId);
         const collectionWords = await cloudStorageService.getWordsByCollection(user.uid, collectionId);
         const foundCollection = collections.find(c => c.id === collectionId);
-        console.log('Found collection:', foundCollection);
         setCurrentCollection(foundCollection || null);
         allWords = collectionWords;
       } else {
@@ -354,7 +351,6 @@ export const CollectionPage: FC = () => {
           {/* Header */}
           {currentCollection ? (
             <div className="mb-8">
-              {console.log('Rendering tabs for collection:', currentCollection.name)}
               <div className={`${currentCollection.gradient} rounded-3xl p-8 mb-6`}>
                 <div className="flex items-center gap-4">
                   <div className="mb-2">
@@ -373,30 +369,6 @@ export const CollectionPage: FC = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Tabs */}
-              <div className="flex gap-2 mb-6">
-                <button
-                  onClick={() => setActiveTab('collection')}
-                  className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-200 ${
-                    activeTab === 'collection'
-                      ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
-                      : 'bg-white/60 text-gray-700 hover:bg-white/80'
-                  }`}
-                >
-                  Collection
-                </button>
-                <button
-                  onClick={() => setActiveTab('review')}
-                  className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-200 ${
-                    activeTab === 'review'
-                      ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
-                      : 'bg-white/60 text-gray-700 hover:bg-white/80'
-                  }`}
-                >
-                  Review
-                </button>
-              </div>
             </div>
           ) : (
             <div className="mb-8">
@@ -407,10 +379,7 @@ export const CollectionPage: FC = () => {
             </div>
           )}
 
-        {/* Collection Tab Content */}
-        {activeTab === 'collection' && (
-          <>
-            {/* Search & Filter */}
+        {/* Search & Filter */}
             <div className="mb-8 flex flex-col sm:flex-row gap-3">
           <input
             type="text"
@@ -561,31 +530,6 @@ export const CollectionPage: FC = () => {
             ))}
             </AnimatePresence>
           </motion.div>
-        )}
-          </>
-        )}
-
-        {/* Review Tab Content */}
-        {activeTab === 'review' && (
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white/60 backdrop-blur-sm rounded-3xl border border-black/5 p-12 text-center">
-              <div className="inline-block p-4 bg-brand-50 rounded-2xl mb-6">
-                <svg className="w-12 h-12 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-charcoal mb-3">Review {currentCollection?.name || 'Collection'}</h3>
-              <p className="text-gray-600 mb-8">
-                Practice your vocabulary with flashcards and spaced repetition
-              </p>
-              <button
-                onClick={() => navigate('/review')}
-                className="px-8 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200"
-              >
-                Start Review Session
-              </button>
-            </div>
-          </div>
         )}
         </div>
       </div>
