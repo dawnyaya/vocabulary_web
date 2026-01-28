@@ -390,7 +390,7 @@ export const CollectionPage: FC = () => {
             <option value="japanese">Japanese</option>
           </select>
           <button
-            onClick={() => navigate('/review')}
+            onClick={() => navigate(collectionId ? `/review?collectionId=${collectionId}` : '/review')}
             className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 whitespace-nowrap"
           >
             Start Review

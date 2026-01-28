@@ -1,4 +1,5 @@
 import { FC, useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { WordWithProgress } from '../types';
 import { cloudStorageService } from '../services/cloudStorage';
 import { getDueWords, updateWordProgress, getIntervalDescription } from '../services/spacedRepetition';
@@ -9,6 +10,8 @@ type DifficultyLevel = 'again' | 'good' | 'easy';
 
 export const ReviewPage: FC = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const collectionId = searchParams.get('collectionId');
   const [dueWords, setDueWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -17,17 +20,19 @@ export const ReviewPage: FC = () => {
 
   useEffect(() => {
     loadDueWords();
-  }, [user]);
+  }, [user, collectionId]);
 
   const loadDueWords = async () => {
     if (!user) return;
 
     setLoading(true);
     try {
-      const [words, allProgress] = await Promise.all([
-        cloudStorageService.getWords(user.uid),
-        cloudStorageService.getProgress(user.uid),
-      ]);
+      // Load words based on collection filter
+      const words = collectionId
+        ? await cloudStorageService.getWordsByCollection(user.uid, collectionId)
+        : await cloudStorageService.getWords(user.uid);
+
+      const allProgress = await cloudStorageService.getProgress(user.uid);
 
       const dueProgress = getDueWords(allProgress);
 
