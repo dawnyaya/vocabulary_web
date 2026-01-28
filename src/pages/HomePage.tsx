@@ -206,7 +206,7 @@ export const HomePage: FC = () => {
 
           {/* Review - Hero card (larger) */}
           <Link to="/review" className="md:col-span-2 md:row-span-2">
-            <div className="h-full bg-gradient-to-br from-brand-500 to-brand-600 rounded-3xl border border-brand-400/20 p-8 hover:shadow-2xl hover:shadow-brand-500/20 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+            <div className="h-full bg-gradient-to-br from-brand-600 to-brand-700 rounded-3xl border border-brand-400/20 p-8 hover:shadow-2xl hover:shadow-brand-700/20 transition-all duration-300 cursor-pointer group relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative z-10">
                 <div className="inline-block p-3 bg-white/10 backdrop-blur-sm rounded-2xl mb-4">

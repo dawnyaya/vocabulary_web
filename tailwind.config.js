@@ -10,20 +10,20 @@ export default {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       colors: {
-        // Modern color palette
+        // Modern color palette - Olive Green Theme
         charcoal: '#121212',
-        'off-white': '#F8FAFC',
+        'off-white': '#FAFAF9',  // 背景色
         brand: {
-          50: '#ECFDF5',   // emerald-50
-          100: '#D1FAE5',  // emerald-100
-          200: '#A7F3D0',  // emerald-200
-          300: '#6EE7B7',  // emerald-300
-          400: '#34D399',  // emerald-400
-          500: '#10B981',  // 辅助色 - emerald-500
-          600: '#059669',  // 主色 - emerald-600
-          700: '#047857',  // emerald-700
-          800: '#065F46',  // emerald-800
-          900: '#064E3B',  // emerald-900
+          50: '#F5F7F0',   // 极浅橄榄绿
+          100: '#E8EDD9',  // 浅橄榄绿
+          200: '#D4DFBB',  // 浅绿背景
+          300: '#BFD19D',  // 中浅绿
+          400: '#A7C957',  // 辅助色 - hover, button
+          500: '#93B84A',  // 辅助色深一点
+          600: '#6B8F3D',  // 中深绿
+          700: '#4B6344',  // 主色 - review card
+          800: '#3A4D35',  // 深绿
+          900: '#2A3727',  // 最深橄榄绿
         },
       },
       backdropBlur: {
