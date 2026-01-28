@@ -30,6 +30,10 @@ export interface WordProgress {
   lastReviewed: Date;
   nextReview: Date;
   reviewCount: number;
+  // SM-2 Algorithm fields
+  easinessFactor: number;  // Difficulty factor (1.3 - 2.5+), default 2.5
+  interval: number;        // Days until next review
+  repetitions: number;     // Consecutive correct answers
 }
 
 export interface WordWithProgress extends VocabularyWord {

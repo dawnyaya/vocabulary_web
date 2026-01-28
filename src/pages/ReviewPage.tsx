@@ -1,7 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import { WordWithProgress } from '../types';
 import { cloudStorageService } from '../services/cloudStorage';
-import { getDueWords, updateWordProgress } from '../services/spacedRepetition';
+import { getDueWords, updateWordProgress, getIntervalDescription } from '../services/spacedRepetition';
 import { useAuth } from '../contexts/AuthContext';
 import { FlashCard } from '../components/FlashCard';
 
@@ -63,14 +63,14 @@ export const ReviewPage: FC = () => {
     const currentWord = dueWords[currentIndex];
     if (!currentWord) return;
 
-    // Map difficulty to familiarity level for existing progress system
+    // Map difficulty to familiarity level
     const familiarityMap = {
       'again': 'not-familiar',
       'good': 'little-familiar',
       'easy': 'very-familiar',
     } as const;
 
-    // Update progress
+    // Update progress using SM-2 algorithm
     const newProgress = updateWordProgress(
       currentWord.id,
       familiarityMap[difficulty],
@@ -91,6 +91,23 @@ export const ReviewPage: FC = () => {
       console.error('Error updating progress:', error);
       alert('Failed to save progress. Please try again.');
     }
+  };
+
+  // Calculate preview intervals for current word
+  const getPreviewIntervals = () => {
+    const currentWord = dueWords[currentIndex];
+    if (!currentWord) return { again: '1 day', good: '6 days', easy: '15 days' };
+
+    // Simulate what each button would result in
+    const againProgress = updateWordProgress(currentWord.id, 'not-familiar', currentWord.progress);
+    const goodProgress = updateWordProgress(currentWord.id, 'little-familiar', currentWord.progress);
+    const easyProgress = updateWordProgress(currentWord.id, 'very-familiar', currentWord.progress);
+
+    return {
+      again: getIntervalDescription(againProgress.interval),
+      good: getIntervalDescription(goodProgress.interval),
+      easy: getIntervalDescription(easyProgress.interval),
+    };
   };
 
   const handleReveal = () => {
@@ -164,36 +181,39 @@ export const ReviewPage: FC = () => {
         )}
 
         {/* Assessment Buttons - Only show when revealed */}
-        {isRevealed && (
-          <div className="mt-8 max-w-[500px] mx-auto">
-            <div className="text-xs font-semibold text-gray-500 text-center mb-3 uppercase tracking-wider">
-              How well did you know this?
+        {isRevealed && currentWord && (() => {
+          const intervals = getPreviewIntervals();
+          return (
+            <div className="mt-8 max-w-[500px] mx-auto">
+              <div className="text-xs font-semibold text-gray-500 text-center mb-3 uppercase tracking-wider">
+                How well did you know this?
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  onClick={() => handleDifficultySelect('again')}
+                  className="py-4 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-2xl transition-all duration-200 border border-slate-200 hover:border-slate-300"
+                >
+                  <div className="text-lg mb-1">Again</div>
+                  <div className="text-xs font-normal text-slate-500">{intervals.again}</div>
+                </button>
+                <button
+                  onClick={() => handleDifficultySelect('good')}
+                  className="py-4 px-6 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-2xl transition-all duration-200 shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30"
+                >
+                  <div className="text-lg mb-1">Good</div>
+                  <div className="text-xs font-normal text-brand-50">{intervals.good}</div>
+                </button>
+                <button
+                  onClick={() => handleDifficultySelect('easy')}
+                  className="py-4 px-6 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold rounded-2xl transition-all duration-200 border border-brand-200 hover:border-brand-300"
+                >
+                  <div className="text-lg mb-1">Easy</div>
+                  <div className="text-xs font-normal text-brand-600">{intervals.easy}</div>
+                </button>
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <button
-                onClick={() => handleDifficultySelect('again')}
-                className="py-4 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-2xl transition-all duration-200 border border-slate-200 hover:border-slate-300"
-              >
-                <div className="text-lg mb-1">Again</div>
-                <div className="text-xs font-normal text-slate-500">Tomorrow</div>
-              </button>
-              <button
-                onClick={() => handleDifficultySelect('good')}
-                className="py-4 px-6 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-2xl transition-all duration-200 shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30"
-              >
-                <div className="text-lg mb-1">Good</div>
-                <div className="text-xs font-normal text-brand-50">2 days</div>
-              </button>
-              <button
-                onClick={() => handleDifficultySelect('easy')}
-                className="py-4 px-6 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold rounded-2xl transition-all duration-200 border border-brand-200 hover:border-brand-300"
-              >
-                <div className="text-lg mb-1">Easy</div>
-                <div className="text-xs font-normal text-brand-600">3+ days</div>
-              </button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );
