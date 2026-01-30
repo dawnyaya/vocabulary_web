@@ -100,13 +100,23 @@ const Navigation: FC = () => {
           {user && (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                {user.photoURL && (
+                {user.photoURL ? (
                   <img
                     src={user.photoURL}
                     alt={user.displayName || 'User'}
-                    className="w-8 h-8 rounded-full border-2 border-brand-200"
+                    className="w-8 h-8 rounded-full border-2 border-brand-200 object-cover"
+                    onError={(e) => {
+                      // Fallback to initials avatar if image fails to load
+                      const target = e.currentTarget;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling;
+                      if (fallback) fallback.classList.remove('hidden');
+                    }}
                   />
-                )}
+                ) : null}
+                <div className={`w-8 h-8 rounded-full border-2 border-brand-200 bg-brand-500 flex items-center justify-center text-white text-xs font-bold ${user.photoURL ? 'hidden' : ''}`}>
+                  {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                </div>
                 <span className="text-sm font-medium text-gray-700 hidden md:block">
                   {user.displayName || user.email}
                 </span>
