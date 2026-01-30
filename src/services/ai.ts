@@ -83,11 +83,13 @@ export const generateMemorizationTip = async (
     const inputLangName = getLanguageName(inputLang);
     const outputLangName = getLanguageName(outputLang);
 
-    const prompt = `Generate a memorization tip in ${outputLangName} for the ${inputLangName} word "${word}" (meaning: "${translation}").
+    const prompt = `Act as a creative mnemonic expert. For the ${inputLangName} word "**${word}**", generate a memorization tip in ${outputLangName}.
 
-Include a pronunciation hint and a visual/story memory technique. Keep it under 50 words, natural and conversational.
+Structure:
+1. Sound Hook: Use a clever homophonic mnemonic or rhyming sound in ${outputLangName} to link the pronunciation to the meaning.
+2. Visual Story: A one-sentence wacky/vivid scene connecting the word's spelling or sound to its meaning.
 
-Write ONLY in ${outputLangName}. Output the tip directly without any prefix.`;
+Constraint: Under 50 words, conversational, output the tip DIRECTLY.`;
 
     const tip = await callGeminiAPI(prompt);
     console.log('=== RAW TIP ===');
@@ -181,7 +183,10 @@ export const generateAllContent = async (
 
     const prompt = `You are a vocabulary learning assistant. Given a word in ${inputLangName}, provide:
 1. Translation to ${outputLangName}
-2. A memorization tip in ${outputLangName} (include pronunciation hint and visual/story technique, under 50 words)
+2. A memorization tip in ${outputLangName} using:
+   - Sound Hook: clever homophonic/rhyming mnemonic linking pronunciation to meaning
+   - Visual Story: one-sentence vivid scene connecting word to meaning
+   (Keep under 50 words, conversational)
 3. An example sentence in ${inputLangName} (natural spoken style, under 30 words)
 
 Word: "${word}"
