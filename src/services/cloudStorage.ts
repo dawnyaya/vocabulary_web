@@ -36,6 +36,9 @@ export const cloudStorageService = {
         return {
           ...data,
           id: doc.id,
+          // Convert null back to undefined for optional fields
+          memorizationTip: data.memorizationTip === null ? undefined : data.memorizationTip,
+          exampleSentence: data.exampleSentence === null ? undefined : data.exampleSentence,
           createdAt: timestampToDate(data.createdAt),
           updatedAt: timestampToDate(data.updatedAt),
         } as VocabularyWord;
@@ -50,11 +53,15 @@ export const cloudStorageService = {
   async addWord(userId: string, word: VocabularyWord): Promise<void> {
     try {
       const wordRef = doc(db, 'users', userId, 'words', word.id);
-      await setDoc(wordRef, {
+      // Convert undefined to null for Firestore (it doesn't store undefined)
+      const wordData = {
         ...word,
+        memorizationTip: word.memorizationTip ?? null,
+        exampleSentence: word.exampleSentence ?? null,
         createdAt: dateToTimestamp(word.createdAt),
         updatedAt: dateToTimestamp(word.updatedAt),
-      });
+      };
+      await setDoc(wordRef, wordData);
     } catch (error) {
       console.error('Error adding word:', error);
       throw error;
@@ -65,11 +72,15 @@ export const cloudStorageService = {
   async updateWord(userId: string, word: VocabularyWord): Promise<void> {
     try {
       const wordRef = doc(db, 'users', userId, 'words', word.id);
-      await setDoc(wordRef, {
+      // Convert undefined to null for Firestore (it doesn't store undefined)
+      const wordData = {
         ...word,
+        memorizationTip: word.memorizationTip ?? null,
+        exampleSentence: word.exampleSentence ?? null,
         createdAt: dateToTimestamp(word.createdAt),
         updatedAt: dateToTimestamp(new Date()),
-      });
+      };
+      await setDoc(wordRef, wordData);
     } catch (error) {
       console.error('Error updating word:', error);
       throw error;
@@ -198,6 +209,9 @@ export const cloudStorageService = {
         return {
           ...data,
           id: doc.id,
+          // Convert null back to undefined for optional fields
+          memorizationTip: data.memorizationTip === null ? undefined : data.memorizationTip,
+          exampleSentence: data.exampleSentence === null ? undefined : data.exampleSentence,
           createdAt: timestampToDate(data.createdAt),
           updatedAt: timestampToDate(data.updatedAt),
         } as VocabularyWord;
