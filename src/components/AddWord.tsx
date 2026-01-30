@@ -1,7 +1,8 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useRef } from 'react';
 import { Language, VocabularyWord, Collection } from '../types';
 import { generateAllContent } from '../services/ai';
 import { speakText } from '../services/textToSpeech';
+import { Toast } from './Toast';
 
 interface AddWordProps {
   onSave: (word: VocabularyWord) => void;
@@ -19,6 +20,10 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
   const [exampleSentence, setExampleSentence] = useState('');
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
+
+  const wordInputRef = useRef<HTMLInputElement>(null);
 
   const languages: Language[] = ['chinese', 'english', 'japanese'];
 
@@ -98,16 +103,26 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
 
     onSave(newWord);
 
+    // Show toast notification
+    setToastMessage(`Added: ${word.trim()}`);
+    setShowToast(true);
+
     // Reset form (but keep the collection selection)
     setWord('');
     setTranslation('');
     setMemorizationTip('');
     setExampleSentence('');
     // Don't reset selectedCollectionId - keep it for next word
+
+    // Auto-focus back to word input
+    setTimeout(() => {
+      wordInputRef.current?.focus();
+    }, 100);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto bg-white/60 backdrop-blur-sm rounded-3xl border border-black/5 p-8">
+    <>
+      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto bg-white/60 backdrop-blur-sm rounded-3xl border border-black/5 p-8">
       <h2 className="text-3xl font-bold text-charcoal mb-8 tracking-tight">Add New Word</h2>
 
       {/* Language Selectors */}
@@ -152,6 +167,7 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">Word</label>
         <div className="flex gap-2">
           <input
+            ref={wordInputRef}
             type="text"
             value={word}
             onChange={(e) => setWord(e.target.value)}
@@ -276,6 +292,14 @@ export const AddWord: FC<AddWordProps> = ({ onSave, collections = [] }) => {
           </button>
         </div>
       </div>
-    </form>
+      </form>
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
+    </>
   );
 };
