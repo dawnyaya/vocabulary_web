@@ -33,7 +33,7 @@ export const AddWordPage: FC = () => {
     setIsSaving(true);
     try {
       await cloudStorageService.addWord(user.uid, word);
-      alert('Word saved successfully!');
+      // Removed success alert - word is saved silently
     } catch (error) {
       console.error('Error saving word:', error);
       alert('Failed to save word. Please try again.');
